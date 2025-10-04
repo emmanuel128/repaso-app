@@ -1,0 +1,29 @@
+# Node
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Others
+*.swp
+*.swo
+
+# Tailwind
+*.css.map
+
+# TypeScript
+*.tsbuildinfo

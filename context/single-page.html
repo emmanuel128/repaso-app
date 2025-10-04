@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía Interactiva para Reválida de Psicología PR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-main': '#A0AB89',
+                        'brand-dark': '#808670',
+                        'brand-accent-1': '#BF8A64',
+                        'brand-accent-2': '#E6B883',
+                        'brand-bg': '#FFFFFF',
+                        'brand-sand': '#F0E1D1',
+                        'brand-gold': '#E89B40',
+                        'brand-rust': '#BD612A',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #questionArea, #answerArea {
+            white-space: pre-line;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0E1D1;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .donut-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .donut-container { height: 400px; }
+        }
+        .gemini-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .gemini-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #A0AB89;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-brand-dark">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-brand-main mb-2">Guía Interactiva para la Reválida</h1>
+            <p class="text-lg md:text-xl text-brand-dark">Una herramienta de estudio diseñada para futuros psicólogos en Puerto Rico.</p>
+        </header>
+        
+        <section class="mb-12 text-center bg-brand-bg p-6 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold text-brand-rust mb-2">¡Hola, futuro colega!</h2>
+            <p class="text-brand-dark max-w-3xl mx-auto">Soy <strong class="text-brand-accent-1">Alexandra Olivencia Torres</strong>, Psicóloga Licenciada y tu guía en este camino hacia la reválida. He creado esta herramienta interactiva para acompañarte y facilitar tu proceso de estudio. ¡Vamos a lograrlo juntos!</p>
+        </section>
+
+        <section class="mb-16 bg-brand-bg p-6 rounded-xl shadow-lg border border-gray-100">
+             <h2 class="text-2xl font-bold text-brand-main text-center mb-4">Distribución de Peso del Examen</h2>
+             <p class="text-center text-sm text-brand-dark mb-4">Enfoca tu energía en las áreas de mayor peso. ¡Cada punto cuenta!</p>
+             <div class="donut-container">
+                <canvas id="examWeightsChart"></canvas>
+             </div>
+        </section>
+
+        <main class="space-y-16">
+
+            <!-- 1. Ética, Legal y Profesional (15%) -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">1</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">El Fundamento Ético y Legal</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 15%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Límites de la Confidencialidad</h3><p class="text-sm text-center mb-3">La confidencialidad es un pilar, pero no es absoluta. Se rompe para proteger.</p><ul class="space-y-2 text-sm"><li><strong class="text-brand-rust">P</strong>eligro: Daño inminente al cliente u otros.</li><li><strong class="text-brand-rust">A</strong>buso: Sospecha de maltrato (Ley 246).</li><li><strong class="text-brand-rust">R</strong>evelación: Con consentimiento escrito.</li><li><strong class="text-brand-rust">A</strong>utoridad: Por orden de un tribunal.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Leyes Clave de PR</h3><p class="text-sm text-center mb-3">El marco legal que rige nuestra práctica en la isla.</p><div class="space-y-3 mt-auto"><div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400"><strong class="text-blue-800">Ley 408 (Salud Mental):</strong> Garantiza derechos del paciente, como el tratamiento en el ambiente menos restrictivo.</div><div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400"><strong class="text-blue-800">Ley 246 (Protección Menores):</strong> Te convierte en reportante mandatorio.</div><div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400"><strong class="text-blue-800">Ley 96 (Reglamenta Psicología):</strong> Define la práctica y los requisitos.</div></div></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Relaciones Múltiples</h3><p class="text-sm text-center mb-3">Ocurren cuando tienes un rol profesional y otro rol (personal, social) con la misma persona.</p><div class="bg-red-50 text-red-800 p-4 rounded-lg mt-auto"><p class="font-bold mb-2">Riesgos Clave:</p><ul class="list-disc list-inside text-sm"><li>Pérdida de objetividad</li><li>Potencial de explotación</li><li>Daño al proceso terapéutico</li></ul></div></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Manejo de Expedientes</h3><p class="text-sm text-center mb-3">Según la Ley 408, los expedientes se deben conservar por un tiempo específico:</p><ul class="space-y-2 text-sm mt-auto"><li><strong>Adultos:</strong> 5 años después de la última visita.</li><li><strong>Menores:</strong> Hasta que cumplan 22 años.</li><li><strong>Casos en litigio:</strong> Se conservan hasta que termine el caso.</li></ul></div>
+                </div>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Asuntos Éticos, Legales y Profesionales', 'Límites de la confidencialidad, Leyes 408, 246 y 96, Relaciones Múltiples, Competencia profesional, Toma de decisiones éticas.')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-1 text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('case', 'Asuntos Éticos, Legales y Profesionales', 'Dilemas de confidencialidad, relaciones duales, o aplicación de leyes de PR en un contexto clínico.')">✨ Generar Caso Clínico</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('explain', 'Asuntos Éticos, Legales y Profesionales', 'la diferencia entre confidencialidad y privilegio, el concepto de "deber de proteger", y qué es una relación dual.')">✨ Explícamelo Fácil</button>
+                </div>
+            </section>
+
+            <!-- 2. Evaluación y Diagnóstico (14%) -->
+            <section>
+                 <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">2</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">La Lupa Clínica: Evaluación y Diagnóstico</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 14%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Psicometría: Validez vs. Confiabilidad</h3><div class="grid grid-cols-1 gap-4 text-center mt-2"><div class="p-4 border-2 border-dashed border-green-400 rounded-lg"><h4 class="font-bold text-lg text-green-700">Confiabilidad</h4><p class="text-gray-600 text-sm">Consistencia<br>(Resultados estables)</p></div><div class="p-4 border-2 border-dashed border-blue-400 rounded-lg"><h4 class="font-bold text-lg text-blue-700">Validez</h4><p class="text-gray-600 text-sm">Exactitud<br>(Mide lo que debe medir)</p></div></div><div class="mt-4 p-2 bg-gray-50 rounded-lg text-center text-sm text-gray-700"><strong>Analogía:</strong> Un reloj 5 min. adelantado es confiable pero no válido.</div></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Instrumentos y Clasificación</h3><p class="text-sm text-center mb-3">Herramientas para entender y organizar los síntomas.</p><ul class="space-y-2 text-sm"><li><strong>Instrumentos:</strong> Wechsler (CI), MMPI (objetivo), TAT (proyectivo), Woodcock-Muñoz (aprendizaje).</li><li><strong>Clasificación:</strong> Uso del DSM-5-TR.</li><li><strong>Diagnóstico Diferencial:</strong> Descartar otros trastornos.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Trastornos de Personalidad</h3><p class="text-sm text-center mb-3">Patrones inflexibles divididos en 3 Clusters:</p><ul class="space-y-1 text-xs"><li><strong>Cluster A (Raros/Excéntricos):</strong> Paranoide, Esquizoide, Esquizotípico.</li><li><strong>Cluster B (Dramáticos/Erráticos):</strong> Antisocial, Límite, Histriónico, Narcisista.</li><li><strong>Cluster C (Ansiosos/Temerosos):</strong> Evitativo, Dependiente, Obsesivo-Compulsivo.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Conceptos Clave</h3><p class="text-sm text-center mb-3">Diferencias importantes en la presentación de síntomas.</p><ul class="space-y-2 text-sm"><li><strong>Trastorno Facticio:</strong> Falsificación de síntomas para asumir el rol de enfermo (atención).</li><li><strong>Simulación (Malingering):</strong> Falsificación intencional de síntomas para obtener un beneficio externo (ej. económico).</li><li><strong>Diagnostic Overshadowing:</strong> Justificar todos los síntomas de un paciente por un solo diagnóstico, ignorando otros problemas.</li></ul></div>
+                </div>
+                 <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Evaluación y Diagnóstico', 'Psicometría (validez, confiabilidad), uso del DSM-5-TR, diagnóstico diferencial, adaptación cultural de pruebas.')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-1 text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('case', 'Evaluación y Diagnóstico', 'Presentación de síntomas complejos que requieren un diagnóstico diferencial cuidadoso en un contexto cultural puertorriqueño.')">✨ Generar Caso Clínico</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('explain', 'Evaluación y Diagnóstico', 'la diferencia entre una prueba objetiva (como el MMPI) y una proyectiva (como el TAT), y qué es un diagnóstico diferencial.')">✨ Explícamelo Fácil</button>
+                </div>
+            </section>
+            
+            <!-- 3. Tratamiento, Intervención y Prevención (14%) -->
+            <section>
+                 <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">3</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">El Arte de la Intervención</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 14%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Enfoques Terapéuticos</h3><div class="grid grid-cols-1 gap-2 mt-auto"><div class="p-2 bg-gray-50 rounded-lg"><h4 class="font-bold text-sm text-brand-dark">TCC</h4><p class="text-xs">Pensamiento-emoción-conducta.</p></div><div class="p-2 bg-gray-50 rounded-lg"><h4 class="font-bold text-sm text-brand-dark">Psicodinámico</h4><p class="text-xs">Inconsciente y pasado.</p></div><div class="p-2 bg-gray-50 rounded-lg"><h4 class="font-bold text-sm text-brand-dark">Humanista</h4><p class="text-xs">Auto-actualización.</p></div><div class="p-2 bg-gray-50 rounded-lg"><h4 class="font-bold text-sm text-brand-dark">Sistémico</h4><p class="text-xs">Dinámicas del sistema.</p></div></div></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Técnica ↔ Trastorno</h3><p class="text-sm text-center mb-3">Asociaciones clave de tratamientos basados en evidencia:</p><ul class="space-y-2 text-sm mt-auto"><li><span class="text-lg text-green-500 mr-2">→</span><strong>EPR</strong> para el <strong>TOC</strong></li><li><span class="text-lg text-green-500 mr-2">→</span><strong>DBT</strong> para el <strong>TLP</strong></li><li><span class="text-lg text-green-500 mr-2">→</span><strong>Activación Conductual</strong> para <strong>Depresión</strong></li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Terapia Humanista y Existencial</h3><p class="text-sm text-center mb-3">Enfoques en el potencial y significado.</p><ul class="space-y-2 text-sm"><li><strong>Carl Rogers:</strong> Terapia Centrada en el Cliente, aceptación incondicional.</li><li><strong>Fritz Perls:</strong> Terapia Gestalt, el "aquí y ahora", silla vacía.</li><li><strong>Rollo May:</strong> Terapia Existencial, búsqueda de sentido, afrontar la ansiedad existencial.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Niveles de Prevención</h3><div class="flex flex-col justify-around text-center h-full mt-2"><div class="w-full p-2"><div class="p-3 bg-green-100 border-t-4 border-green-500 rounded-lg shadow"><h4 class="font-bold text-lg text-green-800">1. Primaria</h4><p class="text-sm text-gray-600 mt-1"><strong>Prevenir</strong> antes de que ocurra.</p></div></div><div class="text-2xl text-gray-400 my-1">↓</div><div class="w-full p-2"><div class="p-3 bg-yellow-100 border-t-4 border-yellow-500 rounded-lg shadow"><h4 class="font-bold text-lg text-yellow-800">2. Secundaria</h4><p class="text-sm text-gray-600 mt-1"><strong>Detectar</strong> temprano en riesgo.</p></div></div><div class="text-2xl text-gray-400 my-1">↓</div><div class="w-full p-2"><div class="p-3 bg-red-100 border-t-4 border-red-500 rounded-lg shadow"><h4 class="font-bold text-lg text-red-800">3. Terciaria</h4><p class="text-sm text-gray-600 mt-1"><strong>Reducir</strong> impacto del problema.</p></div></div></div></div>
+                </div>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Tratamiento, Intervención y Prevención', 'Modelos teóricos (TCC, Humanista), técnicas basadas en evidencia (EPR, DBT), niveles de prevención.')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-1 text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('case', 'Tratamiento, Intervención y Prevención', 'Un paciente presenta un desafío terapéutico que requiere la selección del enfoque de tratamiento más adecuado.')">✨ Generar Caso Clínico</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('mnemonic', 'Tratamiento, Intervención y Prevención', 'los tres niveles de prevención (Primaria, Secundaria, Terciaria).')">✨ Crear Mnemotecnia</button>
+                </div>
+            </section>
+
+            <!-- 4. Bases Cognitivas-Afectivas (13%) -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">4</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">Bases Cognitivas-Afectivas</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 13%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Procesos Cognitivos</h3><ul class="space-y-2 text-sm"><li><strong>Memoria:</strong> Sensorial, corto plazo, largo plazo (explícita, implícita).</li><li><strong>Lenguaje:</strong> Áreas de Broca (producción) y Wernicke (comprensión).</li><li><strong>Función Ejecutiva:</strong> Planificación, control de impulsos (lóbulo frontal).</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Aprendizaje</h3><ul class="space-y-2 text-sm"><li><strong>Condicionamiento Clásico:</strong> Asociación de estímulos (Pavlov).</li><li><strong>Condicionamiento Operante:</strong> Refuerzo y castigo (Skinner).</li><li><strong>Aprendizaje Observacional:</strong> Modelaje (Bandura).</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Motivación y Modelos</h3><ul class="space-y-2 text-sm"><li><strong>Disonancia Cognitiva:</strong> Tensión por creencias contradictorias (Festinger).</li><li><strong>Modelo ABC (Ellis):</strong> Acontecimiento → Creencia (Belief) → Consecuencia.</li><li><strong>Indefensión Aprendida (Seligman):</strong> Pasividad aprendida ante eventos aversivos.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Teorías de la Emoción</h3><p class="text-sm text-center mb-3">¿Cómo experimentamos las emociones?</p><ul class="space-y-2 text-sm"><li><strong>James-Lange:</strong> Estímulo → Reacción Fisiológica → Emoción. ("Corro, luego siento miedo").</li><li><strong>Cannon-Bard:</strong> Estímulo → Reacción Fisiológica Y Emoción (simultáneamente).</li></ul></div>
+                </div>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Bases Cognitivas-Afectivas', 'Procesos cognitivos (memoria, lenguaje), teorías de aprendizaje (clásico, operante), motivación (disonancia cognitiva).')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('explain', 'Bases Cognitivas-Afectivas', 'la diferencia entre condicionamiento clásico y operante usando un ejemplo de la vida diaria.')">✨ Explícamelo Fácil</button>
+                </div>
+            </section>
+
+            <!-- 5. Bases Biológicas (12%) -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">5</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">Bases Biológicas</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 12%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Neuroanatomía Funcional</h3><ul class="space-y-2 text-sm"><li><strong>Lóbulo Frontal:</strong> Funciones ejecutivas, juicio (Caso Phineas Gage).</li><li><strong>Sistema Límbico:</strong> Emociones y memoria (amígdala, hipocampo).</li><li><strong>S.N. Autónomo:</strong> Simpático (lucha/huida) vs. Parasimpático (calma).</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Psicofarmacología Clave</h3><ul class="space-y-2 text-sm"><li><strong>Antidepresivos (ISRS):</strong> Aumentan serotonina.</li><li><strong>Ansiolíticos (Benzos):</strong> Potencian GABA.</li><li><strong>Antipsicóticos:</strong> Afectan la dopamina.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Neurotransmisores y Trastornos</h3><ul class="space-y-2 text-sm"><li><strong>↓ Acetilcolina:</strong> Alzheimer.</li><li><strong>↑ Dopamina:</strong> Esquizofrenia.</li><li><strong>↓ Dopamina:</strong> Parkinson.</li><li><strong>↓ Serotonina/Norepinefrina:</strong> Depresión.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Métodos de Evaluación</h3><p class="text-sm text-center mb-3">Técnicas para observar el cerebro.</p><ul class="space-y-2 text-sm"><li><strong>EEG:</strong> Mide ondas eléctricas (epilepsia, sueño).</li><li><strong>CT Scan / MRI:</strong> Muestran la estructura cerebral (daño, atrofia).</li><li><strong>SPECT / PET:</strong> Miden el flujo sanguíneo y la actividad funcional.</li></ul></div>
+                </div>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Bases Biológicas', 'Neuroanatomía (lóbulos, sistema límbico), psicofarmacología (ISRS, benzos), respuesta al estrés (eje HPA).')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('mnemonic', 'Bases Biológicas', 'los cuatro lóbulos del cerebro (Frontal, Parietal, Temporal, Occipital).')">✨ Crear Mnemotecnia</button>
+                </div>
+            </section>
+
+            <!-- 6. Bases Sociales y Multiculturales (12%) -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">6</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">Bases Sociales y Multiculturales</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 12%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Cognición Social</h3><ul class="space-y-2 text-sm"><li><strong>Error Fundamental de Atribución:</strong> Sobreestimar factores disposicionales en otros.</li><li><strong>Efecto Halo:</strong> Una característica positiva/negativa influye la percepción general.</li><li><strong>Profecía Autocumplida:</strong> Las expectativas influyen en la conducta.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Influencia Social</h3><ul class="space-y-2 text-sm"><li><strong>Conformidad:</strong> Influencia del grupo (Asch).</li><li><strong>Obediencia:</strong> Sometimiento a la autoridad (Milgram).</li><li><strong>Poder Social (French & Raven):</strong> Referente, experto, legítimo, coercitivo, recompensa.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Prejuicio y Discrimen</h3><ul class="space-y-2 text-sm"><li><strong>Estereotipo:</strong> Creencia (cognitivo).</li><li><strong>Prejuicio:</strong> Actitud (afectivo).</li><li><strong>Discriminación:</strong> Comportamiento (conductual).</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Competencia Multicultural</h3><ul class="space-y-2 text-sm"><li><strong>Aculturación:</strong> Proceso de adaptación a una nueva cultura.</li><li><strong>Etnocentrismo:</strong> Juzgar otras culturas desde la propia.</li><li><strong>Adaptación Cultural:</strong> Considerar "familismo" y "respeto" en PR.</li></ul></div>
+                </div>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Bases Sociales y Multiculturales', 'Cognición social (error de atribución), dinámica de grupo (conformidad, obediencia), competencia multicultural.')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('explain', 'Bases Sociales y Multiculturales', 'el Error Fundamental de Atribución con un ejemplo claro.')">✨ Explícamelo Fácil</button>
+                </div>
+            </section>
+
+            <!-- 7. Crecimiento y Desarrollo (12%) -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">7</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">Crecimiento y Desarrollo</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 12%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Desarrollo Cognitivo (Piaget)</h3><ul class="space-y-2 text-sm"><li><strong>Sensoriomotor:</strong> Permanencia del objeto.</li><li><strong>Preoperacional:</strong> Egocentrismo.</li><li><strong>Operaciones Concretas:</strong> Conservación.</li><li><strong>Operaciones Formales:</strong> Pensamiento abstracto.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Desarrollo Psicosocial (Erikson)</h3><ul class="space-y-2 text-sm"><li><strong>Infancia:</strong> Confianza vs. Desconfianza.</li><li><strong>Adolescencia:</strong> Identidad vs. Confusión de Roles.</li><li><strong>Adultez Joven:</strong> Intimidad vs. Aislamiento.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Apego y Crianza</h3><ul class="space-y-2 text-sm"><li><strong>Apego (Bowlby):</strong> Seguro, Inseguro-Evitativo, Inseguro-Ambivalente.</li><li><strong>Estilos de Crianza:</strong> Autoritativo (ideal), Autoritario, Permisivo, Negligente.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Identidad (Marcia)</h3><p class="text-sm text-center mb-3">Crisis vs. Compromiso en la adolescencia.</p><ul class="space-y-1 text-xs"><li><strong>Logro:</strong> Crisis superada, compromiso hecho.</li><li><strong>Moratoria:</strong> En crisis, sin compromiso.</li><li><strong>Exclusión (Foreclosure):</strong> Compromiso sin crisis (impuesto).</li><li><strong>Difusión:</strong> Sin crisis ni compromiso.</li></ul></div>
+                </div>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Crecimiento y Desarrollo', 'Teorías de Piaget (conservación), Erikson (identidad vs confusión), y Bowlby (apego seguro).')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('mnemonic', 'Crecimiento y Desarrollo', 'las 4 etapas del desarrollo cognitivo de Piaget.')">✨ Crear Mnemotecnia</button>
+                </div>
+            </section>
+
+            <!-- 8. Métodos de Investigación (8%) -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="bg-brand-rust text-white rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold mr-4 shadow-lg">8</div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-main">Métodos de Investigación</h2>
+                        <p class="text-xl font-semibold text-brand-dark">Peso: 8%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Diseños de Investigación</h3><ul class="space-y-2 text-sm"><li><strong>Experimental:</strong> Asignación aleatoria, infiere causalidad.</li><li><strong>Cuasi-experimental:</strong> Grupos no equivalentes.</li><li><strong>Correlacional:</strong> Mide la relación, no la causa.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Variables y Validez</h3><ul class="space-y-2 text-sm"><li><strong>Variable Independiente (VI):</strong> La que se manipula.</li><li><strong>Variable Dependiente (VD):</strong> La que se mide.</li><li><strong>Validez Interna:</strong> Confianza en la relación VI-VD.</li><li><strong>Validez Externa:</strong> Generalización de resultados.</li></ul></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Estadísticas Paramétricas vs. No Paramétricas</h3><p class="text-sm"><strong>Paramétricas (ej. t-test, ANOVA):</strong> Usan datos de intervalo/razón, asumen distribución normal.<br><strong>No Paramétricas (ej. Chi-Cuadrado):</strong> Usan datos nominales/ordinales, no asumen distribución.</p></div>
+                    <div class="card"><h3 class="font-bold text-center text-lg text-brand-dark mb-2">Conceptos Estadísticos Clave</h3><ul class="space-y-2 text-sm"><li><strong>Valor p < .05:</strong> Resultado estadísticamente significativo.</li><li><strong>Error Tipo I (α):</strong> Falso positivo.</li><li><strong>Error Tipo II (β):</strong> Falso negativo.</li></ul></div>
+                </div>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button class="gemini-button w-full sm:w-auto bg-brand-main text-white font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('question', 'Métodos de Investigación', 'Diseños de investigación (experimental, correlacional), validez (interna, externa), conceptos estadísticos (valor p, error tipo I/II).')">✨ Generar Pregunta</button>
+                    <button class="gemini-button w-full sm:w-auto bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg" onclick="callGeminiAPI('explain', 'Métodos de Investigación', 'la diferencia entre validez interna y validez externa.')">✨ Explícamelo Fácil</button>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 border-t border-gray-200 pt-8">
+            <p class="font-bold text-xl text-brand-main">¡Tu guía de estudio interactiva está completa!</p>
+            <p class="text-brand-dark">Usa las tarjetas y el generador de preguntas para una preparación sólida y efectiva. ¡Éxito!</p>
+        </footer>
+    </div>
+    
+    <!-- Gemini Modal -->
+    <div id="geminiModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modalTitle" class="text-xl font-bold text-brand-main">Práctica Generada por IA</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <div id="modalLoader" class="flex justify-center items-center h-48">
+                    <div class="loader"></div>
+                </div>
+                <div id="modalContent" class="prose max-w-none hidden">
+                    <div id="questionArea"></div>
+                    <div id="answerArea" class="mt-4 p-4 bg-gray-50 border-l-4 border-brand-main rounded-r-lg hidden"></div>
+                </div>
+            </div>
+            <div class="p-4 border-t flex justify-end gap-4">
+                 <button id="revealAnswerBtn" onclick="revealAnswer()" class="bg-brand-accent-2 text-brand-dark font-bold py-2 px-4 rounded-lg hidden">Revelar Respuesta</button>
+                <button onclick="closeModal()" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const weightsCtx = document.getElementById('examWeightsChart')?.getContext('2d');
+            if (weightsCtx) {
+                new Chart(weightsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [ 'Ética/Legal (15%)', 'Evaluación (14%)', 'Tratamiento (14%)', 'Cognitivo-Afectivo (13%)', 'Biológicas (12%)', 'Social/Multicultural (12%)', 'Desarrollo (12%)', 'Investigación (8%)' ],
+                        datasets: [{
+                            label: 'Peso en el Examen',
+                            data: [15, 14, 14, 13, 12, 12, 12, 8],
+                            backgroundColor: [ '#808670', '#A0AB89', '#BF8A64', '#BD612A', '#E89B40', '#E6B883', '#F0E1D1', '#d1d5db' ],
+                            borderColor: '#FFFFFF',
+                            borderWidth: 3,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 15, color: '#808670' } },
+                            tooltip: { callbacks: { title: function(tooltipItems) { const item = tooltipItems[0]; let label = item.chart.data.labels[item.dataIndex]; if (Array.isArray(label)) { return label.join(' '); } else { return label; } } } }
+                        }
+                    }
+                });
+            }
+        });
+
+        const geminiModal = document.getElementById('geminiModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalLoader = document.getElementById('modalLoader');
+        const modalContent = document.getElementById('modalContent');
+        const questionArea = document.getElementById('questionArea');
+        const answerArea = document.getElementById('answerArea');
+        const revealAnswerBtn = document.getElementById('revealAnswerBtn');
+        let fullContent = '';
+        const apiKey = "AIzaSyA_QTCNnIuULm5d5xMZm1GQZpjq6lPKiEA"; 
+
+        async function fetchWithExponentialBackoff(apiUrl, payload, retries = 5, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.status === 429 || response.status >= 500) { throw new Error(`HTTP error! status: ${response.status}`); }
+                    if (!response.ok) { const errorBody = await response.text(); console.error(`API Error Response: ${errorBody}`); throw new Error(`API request failed with status ${response.status}`);}
+                    return response.json();
+                } catch (error) {
+                    console.warn(`Attempt ${i + 1} failed. Retrying in ${delay}ms...`, error);
+                    if (i < retries - 1) { await new Promise(resolve => setTimeout(resolve, delay)); delay *= 2; } else { throw error; }
+                }
+            }
+        }
+        
+        async function callGeminiAPI(type, section, topics) {
+            openModal();
+
+            const systemPrompts = {
+                question: "Actúas como un experto creador de preguntas para el examen de reválida de psicología en Puerto Rico, siguiendo el estilo del manual de la Junta Examinadora. Eres preciso, claro y enfocado en la aplicación del conocimiento.",
+                case: "Actúas como un supervisor clínico de psicología en Puerto Rico. Creas viñetas clínicas realistas y culturalmente relevantes para entrenar a futuros psicólogos.",
+                explain: "Actúas como un tutor de psicología amigable y paciente, experto en simplificar conceptos complejos. Usas analogías y lenguaje sencillo y claro.",
+                mnemonic: "Eres un creativo experto en técnicas de memorización. Tu especialidad es crear mnemotecnias efectivas y memorables en español."
+            };
+
+            const userPrompts = {
+                question: `Basado en los siguientes temas del área de '${section}': ${topics}. Genera UNA pregunta de práctica de selección múltiple. La pregunta debe ser un escenario o requerir la aplicación de conocimiento. Después del enunciado de la pregunta, presenta cuatro opciones de respuesta etiquetadas como a, b, c, y d. Importante: Cada opción de respuesta debe estar en una nueva línea para facilitar la lectura. Después de las cuatro opciones, incluye el delimitador '---RESPUESTA---'. Finalmente, provee la letra de la respuesta correcta y una explicación concisa y clara de por qué es correcta y por qué las otras son incorrectas.`,
+                case: `Crea un breve caso de estudio (viñeta clínica) relevante al área de '${section}' y los temas: ${topics}. El caso debe involucrar a un paciente ficticio y presentar un dilema o una pregunta diagnóstica/ética/de tratamiento. Incluye detalles socioculturales de Puerto Rico. Después del caso, plantea una pregunta clara para el estudiante. Luego, incluye el delimitador '---RESPUESTA---'. Finalmente, provee una discusión detallada de cómo un psicólogo licenciado abordaría la pregunta, aplicando los conceptos relevantes.`,
+                explain: `Explica los siguientes conceptos del área '${section}' como si yo fuera un principiante: ${topics}. Usa un lenguaje muy sencillo, viñetas (bullet points) y analogías para que sea fácil de entender. Formatea la respuesta en Markdown.`,
+                mnemonic: `Crea una mnemotecnia original y útil en español para recordar los siguientes conceptos clave del área '${section}': ${topics}. Presenta la mnemotecnia en negrita y luego explica brevemente cómo funciona cada parte. Formatea la respuesta en Markdown.`
+            };
+
+            const titles = {
+                question: `Pregunta: ${section}`,
+                case: `Caso Clínico: ${section}`,
+                explain: `Explicación Sencilla: ${section}`,
+                mnemonic: `Mnemotecnia: ${section}`
+            };
+            
+            modalTitle.textContent = titles[type];
+            
+            const payload = { contents: [{ parts: [{ text: userPrompts[type] }] }], systemInstruction: { parts: [{ text: systemPrompts[type] }] } };
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const result = await fetchWithExponentialBackoff(apiUrl, payload);
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo generar contenido. Inténtalo de nuevo.";
+                
+                if (type === 'question' || type === 'case') {
+                    fullContent = text;
+                    displayComplexContent();
+                } else {
+                    displaySimpleContent(text);
+                }
+
+            } catch (error) {
+                console.error("Error fetching from Gemini API:", error);
+                questionArea.innerHTML = `<p class="text-red-500">Hubo un error al generar el contenido. Por favor, intenta de nuevo más tarde.</p>`;
+            } finally {
+                modalLoader.classList.add('hidden');
+                modalContent.classList.remove('hidden');
+            }
+        }
+
+        function displayComplexContent() {
+            const parts = fullContent.split(/---RESPUESTA---/i);
+            questionArea.innerHTML = marked.parse(parts[0] || '');
+            answerArea.innerHTML = marked.parse(parts[1] || '');
+            revealAnswerBtn.classList.remove('hidden');
+        }
+
+        function displaySimpleContent(text) {
+            questionArea.innerHTML = marked.parse(text);
+            revealAnswerBtn.classList.add('hidden');
+        }
+
+        function openModal() {
+            geminiModal.classList.remove('hidden');
+            modalLoader.classList.remove('hidden');
+            modalContent.classList.add('hidden');
+            questionArea.innerHTML = '';
+            answerArea.innerHTML = '';
+            answerArea.classList.add('hidden');
+            revealAnswerBtn.classList.add('hidden');
+        }
+
+        function closeModal() {
+            geminiModal.classList.add('hidden');
+        }
+
+        function revealAnswer() {
+            answerArea.classList.toggle('hidden');
+        }
+
+    </script>
+</body>
+</html>
+
