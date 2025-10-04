@@ -41,7 +41,7 @@ export const AIModalProvider: React.FC<AIModalProviderProps> = ({ children }) =>
     showAnswer: false,
   });
 
-  const apiKey = "***REMOVED_API_KEY***";
+  const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
 
   const systemPrompts = {
     question: "Actúas como un experto creador de preguntas para el examen de reválida de psicología en Puerto Rico, siguiendo el estilo del manual de la Junta Examinadora. Eres preciso, claro y enfocado en la aplicación del conocimiento.",
@@ -124,7 +124,8 @@ export const AIModalProvider: React.FC<AIModalProviderProps> = ({ children }) =>
         }
       };
 
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      // const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
       const result = await fetchWithExponentialBackoff(apiUrl, payload);
       const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo generar contenido. Inténtalo de nuevo.";
 
