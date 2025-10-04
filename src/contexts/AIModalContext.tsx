@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { marked } from 'marked';
 
-interface GeminiModalState {
+interface AIModalState {
   isOpen: boolean;
   loading: boolean;
   modalTitle: string;
@@ -10,29 +10,29 @@ interface GeminiModalState {
   showAnswer: boolean;
 }
 
-interface GeminiModalContextType {
-  modalState: GeminiModalState;
+interface AIModalContextType {
+  modalState: AIModalState;
   openModal: (type: string, section: string, topics: string) => void;
   closeModal: () => void;
   revealAnswer: () => void;
 }
 
-const GeminiModalContext = createContext<GeminiModalContextType | undefined>(undefined);
+const AIModalContext = createContext<AIModalContextType | undefined>(undefined);
 
-export const useGeminiModal = () => {
-  const context = useContext(GeminiModalContext);
+export const useAIModal = () => {
+  const context = useContext(AIModalContext);
   if (!context) {
-    throw new Error('useGeminiModal must be used within a GeminiModalProvider');
+    throw new Error('useAIModal must be used within an AIModalProvider');
   }
   return context;
 };
 
-interface GeminiModalProviderProps {
+interface AIModalProviderProps {
   children: ReactNode;
 }
 
-export const GeminiModalProvider: React.FC<GeminiModalProviderProps> = ({ children }) => {
-  const [modalState, setModalState] = useState<GeminiModalState>({
+export const AIModalProvider: React.FC<AIModalProviderProps> = ({ children }) => {
+  const [modalState, setModalState] = useState<AIModalState>({
     isOpen: false,
     loading: false,
     modalTitle: 'Práctica Generada por IA',
@@ -173,8 +173,8 @@ export const GeminiModalProvider: React.FC<GeminiModalProviderProps> = ({ childr
   };
 
   return (
-    <GeminiModalContext.Provider value={{ modalState, openModal, closeModal, revealAnswer }}>
+    <AIModalContext.Provider value={{ modalState, openModal, closeModal, revealAnswer }}>
       {children}
-    </GeminiModalContext.Provider>
+    </AIModalContext.Provider>
   );
 };

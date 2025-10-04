@@ -1,13 +1,13 @@
 import React from 'react';
 import { StudySectionData } from '../data/studySections';
-import { useGeminiModal } from '../contexts/GeminiModalContext';
+import { useAIModal } from '../contexts/AIModalContext';
 
 interface StudySectionCardProps {
   section: StudySectionData;
 }
 
 const StudySectionCard: React.FC<StudySectionCardProps> = ({ section }) => {
-  const { openModal } = useGeminiModal();
+  const { openModal } = useAIModal();
 
   const handleButtonClick = (
     type: string,

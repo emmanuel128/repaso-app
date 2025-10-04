@@ -1,9 +1,9 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { useGeminiModal } from '../contexts/GeminiModalContext';
+import { useAIModal } from '../contexts/AIModalContext';
 
-const GeminiModal: React.FC = () => {
-  const { modalState, closeModal, revealAnswer } = useGeminiModal();
+const AIModal: React.FC = () => {
+  const { modalState, closeModal, revealAnswer } = useAIModal();
 
   if (!modalState.isOpen) return null;
 
@@ -60,4 +60,4 @@ const GeminiModal: React.FC = () => {
   );
 };
 
-export default GeminiModal;
+export default AIModal;
