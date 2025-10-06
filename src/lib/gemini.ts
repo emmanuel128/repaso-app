@@ -1,4 +1,4 @@
-import { GenerateContentConfig, GoogleGenAI, Type } from '@google/genai'
+import { GenerateContentConfig, GenerateContentResponse, GoogleGenAI, Type } from '@google/genai'
 
 // Initialize the Gemini AI client
 const genAI = new GoogleGenAI({
@@ -284,6 +284,56 @@ export async function generateContent(
 	}
 }
 
+/**
+ * Generate AI content using Gemini API (streaming output).
+ * This function should be used for all interactive content generation.
+ * @param type - Type of content to generate (question, case, explain, mnemonic)
+ * @param section - Psychology section name
+ * @param topics - Comma-separated topics
+ * @returns Async Iterable of content chunks
+ */
+export function streamContent(
+	type: ContentType,
+	section: string,
+	topics: string
+): Promise<AsyncGenerator<GenerateContentResponse>> {
+	try {
+		const selectedModel = getModelForContentType(type);
+		const config = getModelConfig(type);
+
+		if (import.meta.env.DEV) {
+			console.log(`🤖 Using ${selectedModel} for ${type} content (${section}) - STREAMING`);
+		}
+
+		// Note: generateContentStream does not require an explicit retry loop 
+		// if you are handling transient errors inside the stream consumption loop.
+		// It returns a promise that resolves to the stream iterator.
+		return genAI.models.generateContentStream({
+			model: selectedModel,
+			config: config,
+			contents: [
+				{
+					role: 'user',
+					parts: [{ text: USER_PROMPTS[type](section, topics) }]
+				}
+			]
+		});
+
+	} catch (error) {
+		console.error('Error starting stream with Gemini:', error)
+		// Re-throw standardized error messages
+		if (error instanceof Error) {
+			if (error.message.includes('quota') || error.message.includes('429')) {
+				throw new Error('Se ha excedido el límite de uso de la API. Intenta de nuevo más tarde.')
+			} else if (error.message.includes('safety') || error.message.includes('400')) {
+				throw new Error('El contenido fue bloqueado por las políticas de seguridad o el formato fue incorrecto. Intenta con temas diferentes.')
+			} else if (error.message.includes('network') || error.message.includes('fetch')) {
+				throw new Error('Error de conexión. Verifica tu conexión a internet e intenta de nuevo.')
+			}
+		}
+		throw new Error('No se pudo iniciar el stream de contenido. Intenta de nuevo más tarde.');
+	}
+}
 
 /**
  * Get title for content type
