@@ -10,17 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "@supabase/supabase-js": "^2.58.0",
+    "@types/react-router-dom": "^5.3.3",
     "chart.js": "^4.4.0",
-    "react-chartjs-2": "^5.2.0",
+    "lucide-react": "^0.294.0",
     "marked": "^9.1.6",
-    "lucide-react": "^0.294.0"
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.9.3"
   },
   "devDependencies": {
+    "@types/marked": "^6.0.0",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
-    "@types/marked": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "@vitejs/plugin-react": "^4.1.0",

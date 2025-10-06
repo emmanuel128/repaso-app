@@ -1,6 +1,7 @@
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { EXAM_COLORS } from '../constants/colors';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -20,16 +21,7 @@ const ExamWeightsChart: React.FC = () => {
       {
         label: 'Peso en el Examen',
         data: [15, 14, 14, 13, 12, 12, 12, 8],
-        backgroundColor: [
-          '#808670',
-          '#A0AB89',
-          '#BF8A64',
-          '#BD612A',
-          '#E89B40',
-          '#E6B883',
-          '#F0E1D1',
-          '#d1d5db'
-        ],
+        backgroundColor: EXAM_COLORS.hex,
         borderColor: '#FFFFFF',
         borderWidth: 3,
       }
