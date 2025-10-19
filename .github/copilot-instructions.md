@@ -13,18 +13,22 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
 - Variables sensibles en `.env` (nunca hardcode). Provee claves públicas (anon) y privadas (service role) separadas.
 
 ## 🧪 Flujo de Desarrollo
-1. Crear rama feature.
+1. Instalar dependencias del monorepo:
+   ```bash
+   npm install
+   ```
+   Esto instala dependencias compartidas y de cada app.
 2. Ejecutar entorno local:
-   - Web: `cd web && npm run dev`
-   - Mobile: `cd mobile && npx expo start`
-   - Supabase local (si se edita schema): `npx supabase start`
+   - Web: `cd apps/web && npm run dev`
+   - Mobile: `cd apps/mobile && npx expo start`
+   - Supabase local (si se edita schema): `cd apps/supabase && npx supabase start`
    - Para entorno local completo de Supabase:
      ```bash
      npx supabase start      # Iniciar Supabase local
      npx supabase db push    # Aplicar migraciones locales
      npx supabase stop       # Detener la instancia
      ```
-3. Migraciones: editar en `supabase/migrations/` y aplicar con `npx supabase db push`.
+3. Migraciones: editar en `apps/supabase/migrations/` y aplicar con `npx supabase db push`.
 4. Commit temprano y frecuente. PR dispara CI (lint, build, test, deploy).
 
 ## 🧾 Convenciones de Commits
@@ -45,7 +49,7 @@ Tipos: feat | fix | chore | docs | test | refactor
 - Manejo de estado global mínimo; preferir hooks por feature.
 
 ## 🗃 Datos y Migraciones
-- Cada nueva feature que requiere datos: agregar migración SQL en `supabase/migrations/` con nombre timestamp + descripción.
+- Cada nueva feature que requiere datos: agregar migración SQL en `apps/supabase/migrations/` con nombre timestamp + descripción.
 - Seeds: crear scripts para datos base (roles, exámenes) reutilizables en entornos.
 - Evita cambios destructivos sin migración reversible (usar `ALTER` vs `DROP`).
 
