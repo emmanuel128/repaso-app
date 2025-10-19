@@ -1,7 +1,6 @@
 # 🧠 Repaso App
 
-[![Build Status](https://github.com/emmanuel128/repaso-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/emmanuel128/repaso-app/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<!-- [![Build Status](https://github.com/emmanuel128/repaso-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/emmanuel128/repaso-app/actions) -->
 
 Plataforma educativa para repasar y prepararse para exámenes profesionales.  
 Diseñada inicialmente para la **Revalida de Psicología en Puerto Rico**, pero construida con una arquitectura **whitelabel**, adaptable a otros exámenes como **Maestros, Abogados o College Board**.
@@ -12,7 +11,7 @@ Diseñada inicialmente para la **Revalida de Psicología en Puerto Rico**, pero 
 
 | Área | Tecnología |
 |------|-------------|
-| Frontend Web | [React](https://react.dev/) + [Vite](https://vitejs.dev/) + [TailwindCSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
+| Frontend Web | [Next.js](https://nextjs.org/) + [TailwindCSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
 | Mobile | [Expo](https://expo.dev/) (React Native) |
 | Backend | [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage, Edge Functions) |
 | CI/CD | [GitHub Actions](https://github.com/features/actions) |
@@ -25,18 +24,74 @@ Diseñada inicialmente para la **Revalida de Psicología en Puerto Rico**, pero 
 
 ```bash
 repaso-app/
-├── web/                # App web (React + Vite)
-├── mobile/             # App móvil (Expo)
-├── supabase/           # Migraciones, funciones y seeds de base de datos
+│
+├── supabase/                      # 🗄️ Backend (DB, auth, storage, functions)
+│   ├── migrations/
+│   │   ├── 20251017_init_schema.sql
+│   │   ├── 20251018_add_user_attempts.sql
+│   ├── seed.sql
+│   ├── functions/                 # Edge Functions (serverless logic)
+│   │   ├── onPaymentWebhook.ts
+│   │   ├── calculateProgress.ts
+│   ├── config.toml
+│   └── README.md
+│
+├── apps/                          # 🌐📱 Frontends
+│   ├── web/                       # Next.js app (SSR + PWA)
+│   │   ├── next.config.js
+│   │   ├── package.json
+│   │   └── src/
+│   │       ├── pages/
+│   │       ├── components/
+│   │       ├── lib/
+│   │       ├── hooks/
+│   │       └── utils/
+│   │
+│   ├── mobile/                    # Expo app (React Native)
+│   │   ├── app.config.ts
+│   │   ├── package.json
+│   │   └── src/
+│   │       ├── screens/
+│   │       ├── components/        # comparte UI con web
+│   │       ├── hooks/             # comparte lógica (useAuth, useProgress, etc.)
+│   │       ├── lib/
+│   │       ├── utils/
+│   │       └── navigation/
+│
+├── packages/                      # 🧩 Código compartido entre web y móvil
+│   ├── ui/                        # Componentes reutilizables (botones, inputs, modales)
+│   ├── lib/                       # Conexión Supabase, lógica de negocio
+│   ├── hooks/                     # useAuth, useProgress, etc.
+│   ├── types/                     # Tipos TypeScript comunes
+│   └── utils/                     # Funciones helper
+│
 ├── .github/
-│   └── workflows/      # CI/CD (build, test, deploy)
-├── .env.example        # Variables de entorno
-├── package.json
+│   └── workflows/
+│       ├── supabase-migrations.yml
+│       ├── web-deploy.yml
+│       └── mobile-build.yml
+│
+├── docs/
+│   ├── architecture.md
+│   ├── data-model.md
+│   └── deployment-guide.md
+│
+├── package.json                   # Usa npm workspaces o Turborepo
+├── turbo.json                     # Configuración de Turborepo (si lo usas)
+├── .env.example
+├── tsconfig.json
 └── README.md
+````
+```mermaid
+graph TD
+  A[Frontend Web (Next.js)] -->|API| B[Supabase]
+  C[Mobile App (Expo)] -->|Auth + Data| B
+  B --> D[Storage / Edge Functions]
+  B --> E[PostgreSQL DB]
+  A --> F[UI Shared Components]
+  C --> F
 ```
-
 ## ⚙️ Configuración e Instalación
-
 
 1️⃣ Clonar el repositorio
 
@@ -64,14 +119,29 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 ### 4️⃣ Ejecutar la app web
 ```bash
-cd web
+cd apps/web
 npm run dev
 ```
 
 ### 5️⃣ Ejecutar la app móvil
 ```bash
-cd mobile
+cd apps/mobile
 npx expo start
+```
+
+### 6️⃣ Entorno local con Supabase
+
+Puedes correr una instancia local de Supabase para desarrollo y pruebas:
+
+```bash
+# Iniciar Supabase localmente
+npx supabase start
+
+# Aplicar migraciones locales
+npx supabase db push
+
+# Detener la instancia
+npx supabase stop
 ```
 
 ---
@@ -126,15 +196,11 @@ npx expo start
 4. Haz push a la rama (`git push origin feature/nueva-funcionalidad`)  
 5. Crea un Pull Request 🎉  
 
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia **MIT**.  
-Consulta el archivo [LICENSE](./LICENSE) para más detalles.
+## 🧾 Convenciones
+- **Commits:** usa formato `tipo(scope): descripción` (ej. `feat(auth): agregar login con OTP`)
+- **Branches:** usa prefijo `feature/`, `fix/`, `chore/`
+- **Naming:** archivos y carpetas en kebab-case, componentes en PascalCase
 
 ---
 
-> Desarrollado con ❤️ por el equipo de **Repaso App**  
-> [repaso.app](https://repaso.app) _(sitio en construcción)_
 
