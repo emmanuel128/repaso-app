@@ -53,6 +53,10 @@ Tipos: feat | fix | chore | docs | test | refactor
 - Seeds: crear scripts para datos base (roles, exámenes) reutilizables en entornos.
 - Cuando sea necesario, crear cambios destructivos.
 
+## 🌍 Convención de Idioma
+- Todas las **entidades (tablas, columnas, modelos, interfaces y relaciones)** deben definirse **en inglés** para mantener consistencia con convenciones internacionales y facilitar integración con herramientas externas.
+- Los textos visibles para el usuario final (ej. preguntas, instrucciones, labels) pueden mantenerse en español.
+
 ## 🛡 Calidad y CI
 - PR debe pasar: Lint, Build, Tests. Si falla migración, revisar orden y dependencias de constraints.
 - Agente puede sugerir nueva acción en GitHub Actions workflow (`.github/workflows/`) pero mantén pasos idempotentes.
