@@ -51,7 +51,7 @@ Tipos: feat | fix | chore | docs | test | refactor
 ## 🗃 Datos y Migraciones
 - Cada nueva feature que requiere datos: agregar migración SQL en `apps/supabase/migrations/` con nombre timestamp + descripción.
 - Seeds: crear scripts para datos base (roles, exámenes) reutilizables en entornos.
-- Evita cambios destructivos sin migración reversible (usar `ALTER` vs `DROP`).
+- Cuando sea necesario, crear cambios destructivos.
 
 ## 🛡 Calidad y CI
 - PR debe pasar: Lint, Build, Tests. Si falla migración, revisar orden y dependencias de constraints.
