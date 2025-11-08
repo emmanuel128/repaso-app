@@ -19,16 +19,17 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
    ```
    Esto instala dependencias compartidas y de cada app.
 2. Ejecutar entorno local:
-   - Web: `cd apps/web && npm run dev`
-   - Mobile: `cd apps/mobile && npx expo start`
-   - Supabase local (si se edita schema): `cd apps/supabase && npx supabase start`
-   - Para entorno local completo de Supabase:
-     ```bash
-     npx supabase start      # Iniciar Supabase local
-     npx supabase db push    # Aplicar migraciones locales
-     npx supabase stop       # Detener la instancia
-     ```
-3. Migraciones: editar en `apps/supabase/migrations/` y aplicar con `npx supabase db push`.
+    - Web: `cd apps/web && npm run dev`
+    - Mobile: `cd apps/mobile && npx expo start`
+    - Supabase local (si se edita schema): `cd infra/database && npm start`
+    - Para entorno local completo de Supabase:
+       ```bash
+       cd infra/database
+       npm start      # Iniciar Supabase local
+       npm run migrate    # Aplicar migraciones locales
+       npm run stop       # Detener la instancia
+       ```
+3. Migraciones: editar en `infra/database/supabase/migrations/` y aplicar con `npm run migrate`.
 4. Commit temprano y frecuente. PR dispara CI (lint, build, test, deploy).
 
 ## 🧾 Convenciones de Commits
@@ -49,8 +50,24 @@ Tipos: feat | fix | chore | docs | test | refactor
 - Manejo de estado global mínimo; preferir hooks por feature.
 
 ## 🗃 Datos y Migraciones
-- Cada nueva feature que requiere datos: agregar migración SQL en `apps/supabase/migrations/` con nombre timestamp + descripción.
-- Seeds: crear scripts para datos base (roles, exámenes) reutilizables en entornos.
+- Cada nueva feature que requiere datos: agregar migración SQL en `infra/supabase/supabase/migrations/` con nombre timestamp + descripción.
+- Seeds: crear scripts para datos base (roles, exámenes) en `infra/supabase/supabase/seeds/seed.sql` reutilizables en entornos.
+## 🗃 Estructura recomendada para Supabase
+
+```
+infra/supabase/
+   .env
+   .gitignore
+   package.json
+   supabase/
+      config.toml
+      migrations/
+         <timestamp>_init.sql
+      seeds/
+         seed.sql
+```
+
+Incluye `.env` para `$DB_URL` local si usas scripts personalizados.
 - Cuando sea necesario, crear cambios destructivos.
 
 ## 🌍 Convención de Idioma

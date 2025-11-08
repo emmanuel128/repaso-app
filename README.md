@@ -25,16 +25,18 @@ Scaffolding inicial listo para iniciar desarrollo.
 ```bash
 repaso-app/
 │
-├── supabase/                      # 🗄️ Backend (DB, auth, storage, functions)
-│   ├── migrations/
-│   │   ├── 20251017_init_schema.sql
-│   │   ├── 20251018_add_user_attempts.sql
-│   ├── seed.sql
-│   ├── functions/                 # Edge Functions (serverless logic)
-│   │   ├── onPaymentWebhook.ts
-│   │   ├── calculateProgress.ts
-│   ├── config.toml
-│   └── README.md
+├── infra/
+│   ├── database/                  # 🗄️ Backend (DB, auth, storage, migrations, seeds)
+│   │   ├── .env                   # Variables de entorno locales (no commitear)
+│   │   ├── .gitignore
+│   │   ├── package.json
+│   │   └── supabase/
+│   │       ├── config.toml
+│   │       ├── migrations/
+│   │       │   └── 20251026_init.sql
+│   │       ├── seeds/
+│   │       │   └── seed.sql
+│   │       ├── functions/         # Edge Functions (serverless logic)
 │
 ├── apps/                          # 🌐📱 Frontends
 │   ├── web/                       # Next.js app (SSR + PWA)
