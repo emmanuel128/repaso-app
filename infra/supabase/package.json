@@ -1,0 +1,12 @@
+{
+  "name": "infra-supabase",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "migrate": "supabase migration up",
+    "reset": "supabase db reset",
+    "seed": "psql \"$DB_URL\" -f ./seeds/seed.sql"
+  }
+}
