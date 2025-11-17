@@ -105,7 +105,8 @@ create index if not exists idx_tenant_domains_tenant on tenant_domains(tenant_id
 -- Perfil de usuario vinculado a auth.users
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  full_name text,
+  first_name text,
+  last_name text,
   avatar_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

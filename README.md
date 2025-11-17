@@ -49,7 +49,7 @@ repaso-app/
 │   │       ├── hooks/
 │   │       └── utils/
 │   │
-│   ├── mobile/                    # Expo app (React Native)
+│   ├── mobile/                    # Expo app (React Native) (future development)
 │   │   ├── app.config.ts
 │   │   ├── package.json
 │   │   └── src/
@@ -78,16 +78,16 @@ repaso-app/
 │   ├── data-model.md
 │   └── deployment-guide.md
 │
-├── package.json                   # Usa npm workspaces o Turborepo
-├── turbo.json                     # Configuración de Turborepo (si lo usas)
+├── package.json                   # Usa npm workspaces
 ├── .env.example
 ├── tsconfig.json
 └── README.md
 ````
+## Diagrama
 ```mermaid
 graph TD
-  A[Frontend Web (Next.js)] -->|API| B[Supabase]
-  C[Mobile App (Expo)] -->|Auth + Data| B
+  A[Frontend Web -Next.js-] -->|API| B[Supabase]
+  C[Mobile App -Expo-] -->|Auth + Data| B
   B --> D[Storage / Edge Functions]
   B --> E[PostgreSQL DB]
   A --> F[UI Shared Components]

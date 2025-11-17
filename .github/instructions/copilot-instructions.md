@@ -12,6 +12,67 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
 - Usa nombres de ramas `feature/<descripcion-corta>`, `fix/<issue>`, `chore/<tarea>`.
 - Variables sensibles en `.env` (nunca hardcode). Provee claves públicas (anon) y privadas (service role) separadas.
 
+### Estructura de Carpetas
+```bash
+repaso-app/
+│
+├── infra/
+│   ├── database/                  # 🗄️ Backend (DB, auth, storage, migrations, seeds)
+│   │   ├── .env                   # Variables de entorno locales (no commitear)
+│   │   ├── package.json
+│   │   └── supabase/
+│   │       ├── migrations/
+│   │       │   └── 20251026_init.sql
+│   │       ├── seeds/
+│   │       │   └── seed.sql
+│   │       ├── functions/         # Edge Functions (serverless logic)
+│
+├── apps/                          # 🌐📱 Frontends
+│   ├── web/                       # Next.js app (SSR + PWA)
+│   │   ├── next.config.js
+│   │   ├── package.json
+│   │   └── src/
+│   │       ├── pages/
+│   │       ├── components/
+│   │       ├── lib/
+│   │       ├── hooks/
+│   │       └── utils/
+│   │
+│   ├── mobile/                    # Expo app (React Native) (future development)
+│   │   ├── app.config.ts
+│   │   ├── package.json
+│   │   └── src/
+│   │       ├── screens/
+│   │       ├── components/        # comparte UI con web
+│   │       ├── hooks/             # comparte lógica (useAuth, useProgress, etc.)
+│   │       ├── lib/
+│   │       ├── utils/
+│   │       └── navigation/
+│
+├── packages/                      # 🧩 Código compartido entre web y móvil
+│   ├── ui/                        # Componentes reutilizables (botones, inputs, modales)
+│   ├── lib/                       # Conexión Supabase, lógica de negocio
+│   ├── hooks/                     # useAuth, useProgress, etc.
+│   ├── types/                     # Tipos TypeScript comunes
+│   └── utils/                     # Funciones helper
+│
+├── .github/
+│   └── workflows/
+│       ├── supabase-migrations.yml
+│       ├── web-deploy.yml
+│       └── mobile-build.yml
+│
+├── docs/
+│   ├── architecture.md
+│   ├── data-model.md
+│   └── deployment-guide.md
+│
+├── package.json                   # Usa npm workspaces
+├── .env.example
+├── tsconfig.json
+└── README.md
+````
+
 ## 🧪 Flujo de Desarrollo
 1. Instalar dependencias del monorepo:
    ```bash
@@ -31,6 +92,39 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
        ```
 3. Migraciones: editar en `infra/database/supabase/migrations/` y aplicar con `npm run migrate`.
 4. Commit temprano y frecuente. PR dispara CI (lint, build, test, deploy).
+
+# 🎨 Paleta de Colores – Repaso Psicología PR
+
+## Colores Principales
+- **Primario:** `#3B82F6`
+- **Secundario:** `#A78BFA`
+- **Acento:** `#14B8A6`
+
+## Neutros
+- **Fondo Claro:** `#F9FAFB`
+- **Texto Primario / Fondo Oscuro:** `#1F2937`
+- **Texto Secundario:** `#6B7280`
+
+## Estados
+- **Éxito:** `#22C55E`
+- **Advertencia:** `#FACC15`
+- **Error:** `#EF4444`
+
+---
+
+## Paleta en Bloques
+
+| Nombre | Color | Hex |
+|--------|--------|------|
+| Primario | ![#3B82F6](https://placehold.co/15x15/3B82F6/000000.png) | `#3B82F6` |
+| Secundario | ![#A78BFA](https://placehold.co/15x15/A78BFA/000000.png) | `#A78BFA` |
+| Acento | ![#14B8A6](https://placehold.co/15x15/14B8A6/000000.png) | `#14B8A6` |
+| Fondo Claro | ![#F9FAFB](https://placehold.co/15x15/F9FAFB/000000.png) | `#F9FAFB` |
+| Fondo Oscuro | ![#1F2937](https://placehold.co/15x15/1F2937/000000.png) | `#1F2937` |
+| Texto Secundario | ![#6B7280](https://placehold.co/15x15/6B7280/000000.png) | `#6B7280` |
+| Éxito | ![#22C55E](https://placehold.co/15x15/22C55E/000000.png) | `#22C55E` |
+| Advertencia | ![#FACC15](https://placehold.co/15x15/FACC15/000000.png) | `#FACC15` |
+| Error | ![#EF4444](https://placehold.co/15x15/EF4444/000000.png) | `#EF4444` |
 
 ## 🧾 Convenciones de Commits
 Usa el formato: `<tipo>(área): descripción breve`

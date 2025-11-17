@@ -1,0 +1,30 @@
+{
+  "name": "repaso-app",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": "22.x"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "infra/*"
+  ],
+  "scripts": {
+    "dev:all": "npm run -ws --if-present dev",
+    "build:all": "npm run -ws --if-present build",
+    "lint:all": "npm run -ws --if-present lint",
+    "typecheck": "npm run -ws --if-present typecheck",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:mobile": "npm run dev --workspace=apps/mobile",
+    "db:migrate": "npm --workspace=infra/database run migrate",
+    "db:seed": "npm --workspace=infra/database run seed",
+    "db:reset": "npm --workspace=infra/database run reset",
+    "db:start": "npm run start --workspace=infra/database",
+    "db:stop": "npm run stop --workspace=infra/database"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.76.1",
+    "zod": "^4.1.12"
+  }
+}
