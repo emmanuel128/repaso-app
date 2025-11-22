@@ -1,0 +1,11 @@
+{
+  "type": "user.created",
+  "record": {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "email": "test+unconfirmed@example.com",
+    "raw_user_meta_data": {
+      "first_name": "Alan",
+      "last_name": "Turing"
+    }
+  }
+}

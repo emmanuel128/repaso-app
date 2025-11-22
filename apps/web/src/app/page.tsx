@@ -11,6 +11,8 @@ export default function Home() {
   useEffect(() => {
     const checkAuth = async () => {
       const { session } = await auth.getSession();
+
+      // TODO: Redirect based on user role
       if (session) {
         router.push('/dashboard');
       } else {
