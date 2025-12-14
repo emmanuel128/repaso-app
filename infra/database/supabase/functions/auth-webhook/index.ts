@@ -1,253 +1,179 @@
 // index.ts
 // Supabase Edge Function: auth-webhook
 //
-// Purpose:
-// - Receive Auth events from Supabase (user.created / user.updated).
-// - When user email is confirmed, run post-signup tasks:
-//   - upsert profiles (includes first_name & last_name)
-//   - ensure user_tenants mapping exists (uses DEFAULT_TENANT_ID if present)
-//   - create memberships row (trialing) if not exists
-//   - insert audit_log entry
+// Triggers:
+// - Database Webhook on auth.users (INSERT, UPDATE)
+//
+// Responsibilities:
+// - On INSERT: create profile + tenant mapping immediately
+// - On UPDATE: run post-confirm logic only when email gets confirmed
 //
 // Security:
-// - Checks that either header 'x-signature' OR 'x-supabase-webhook-source'
-//   exactly matches WEBHOOK_SECRET.
+// - Validates static webhook secret via header
 //
-// Environment variables required:
+// Required env vars:
 // - SUPABASE_URL
 // - SUPABASE_SERVICE_ROLE_KEY
 // - WEBHOOK_SECRET
-// - DEFAULT_TENANT_ID  (UUID)  (optional but recommended for single-tenant flows)
+// - DEFAULT_TENANT_ID (optional)
 
 import { createClient } from "@supabase/supabase-js";
-// import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-// NOTE: Edge runtime (Deno / Bun / Node depending on supabase) usually supports
-// the Web Crypto API. We use subtle.crypto for HMAC verification to be portable.
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET")!;
 const DEFAULT_TENANT_ID = Deno.env.get("DEFAULT_TENANT_ID") ?? null;
 
-console.log("Auth webhook starting...");
-// debug print env vars (except secrets)
-// console.debug("SUPABASE_URL:", SUPABASE_URL);
-// console.debug("SUPABASE_SERVICE_ROLE_KEY:", SUPABASE_SERVICE_ROLE_KEY);
-// console.debug("WEBHOOK_SECRET:", WEBHOOK_SECRET);
-// console.debug("DEFAULT_TENANT_ID:", DEFAULT_TENANT_ID);
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !WEBHOOK_SECRET) {
-  console.error(
-    "Missing required env vars. SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WEBHOOK_SECRET",
-  );
-}
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
-/**
- * Heuristics to determine whether the user is confirmed.
- * Supabase payloads may have different shapes depending on webhook config / version.
- */
-function isEmailConfirmed(payload: any): boolean {
-  // Common places:
-  // - payload.record.email_confirmed_at
-  // - payload.user.email_confirmed_at
-  // - payload.user.confirmed_at
-  // - payload.record.confirmed_at
-  // - payload.event === 'USER_VERIFIED' (if that exists)
-  try {
-    if (!payload) return false;
-    const record = payload.record ?? payload.user ?? payload;
-    // Accept non-empty timestamp or boolean true
-    const vals = [
-      record?.email_confirmed_at,
-      record?.confirmed_at,
-      record?.email_confirmed,
-      payload?.event === "USER_VERIFIED",
-      payload?.type === "user.updated" && record?.email_confirmed_at,
-    ];
-    for (const v of vals) {
-      if (v === true) return true;
-      if (typeof v === "string" && v.trim() !== "") return true;
-      if (v instanceof Date) return true;
-    }
-    return false;
-  } catch (err) {
-    return false;
-  }
-}
-
-/**
- * Extract canonical user record from payload.
- * We expect an object with at least: id, email, raw_user_meta_data (optional)
- */
-function extractUser(payload: any) {
-  // Try different shapes
-  const record = payload?.record ?? payload?.user ?? payload;
-  if (!record) return null;
-  // Supabase auth user fields: id, email, raw_user_meta_data, created_at, ...
-  return {
-    id: record.id,
-    email: record.email,
-    first_name: record.raw_user_meta_data?.first_name ??
-      record.raw_user_meta_data?.firstName ?? null,
-    last_name: record.raw_user_meta_data?.last_name ??
-      record.raw_user_meta_data?.lastName ?? null,
-    metadata: record.raw_user_meta_data ?? {},
-  };
-}
-
-/**
- * Main handler
- */
 Deno.serve(async (req) => {
-  // console.info("Received auth webhook request", JSON.stringify(req, null, 2));
-  return await authWebhookHandler(req);
+  return await handler(req);
 });
-// export default async function (req: Request) {
-async function authWebhookHandler(req: Request) {
-  const rawBody = await req.text();
 
-  // Simplified signature validation
-  const headerSig = req.headers.get("x-signature") ||
-    req.headers.get("x-supabase-webhook-source") ||
+async function handler(req: Request): Promise<Response> {
+  // --- 1) Static secret validation
+  const signature = req.headers.get("x-signature") ??
+    req.headers.get("x-supabase-webhook-source") ??
     "";
 
-  if (headerSig !== WEBHOOK_SECRET) {
-    console.warn("Invalid webhook secret header");
-    return new Response(JSON.stringify({ error: "invalid signature" }), {
+  if (signature !== WEBHOOK_SECRET) {
+    console.warn("auth-webhook: invalid webhook secret");
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
       status: 401,
     });
   }
-  // return new Response(JSON.stringify({ ok: true }), { status: 200 });
+
+  // --- 2) Parse payload
   let payload: any;
   try {
-    payload = JSON.parse(rawBody);
-    // console.debug("Parsed payload:", JSON.stringify(payload, null, 2));
-  } catch (err) {
-    console.error("invalid json payload", err);
-    return new Response(JSON.stringify({ error: "invalid JSON" }), {
+    payload = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "invalid_json" }), {
       status: 400,
     });
   }
 
-  // Only process if email is confirmed (or event indicates confirmation)
-  const confirmed = isEmailConfirmed(payload);
-  // Some flows: user.created might already be confirmed (depending on email flow)
-  const eventType = payload?.type ?? payload?.event ?? null;
-  console.debug("auth-webhook eventType:", eventType);
+  const eventType = payload?.type ?? payload?.event;
+  const record = payload?.record;
 
-  // If not confirmed, but event is user.created and you still want to create profile earlier,
-  // you can change logic. We follow your request: do post-signup tasks only on confirmed emails.
-  if (!confirmed) {
-    // Nothing to do - return 200 so Supabase doesn't retry excessively.
-    return new Response(
-      JSON.stringify({ ok: false, reason: "email_not_confirmed" }),
-      { status: 200 },
-    );
-  }
-
-  const user = extractUser(payload);
-  if (!user?.id) {
-    console.error("no user id in payload:", payload);
-    return new Response(JSON.stringify({ error: "no user id" }), {
-      status: 400,
+  console.debug("payload received", payload);
+  if (!record?.id) {
+    console.warn("auth-webhook: missing record.id");
+    return new Response(JSON.stringify({ ok: true, skip: true }), {
+      status: 200,
     });
   }
 
-  const tenantId = DEFAULT_TENANT_ID;
-  if (!tenantId) {
-    console.warn(
-      "DEFAULT_TENANT_ID not configured - user will be linked to null tenant unless you handle differently.",
+  const userId = record.id;
+
+  // --- 3) Determine event intent
+  const isInsert = eventType === "INSERT" ||
+    eventType === "user.created";
+
+  const emailConfirmed = !!record.email_confirmed_at ||
+    !!record.confirmed_at ||
+    record.email_confirmed === true;
+
+  const isConfirmedUpdate =
+    (eventType === "UPDATE" || eventType === "user.updated") &&
+    emailConfirmed;
+
+  if (!isInsert && !isConfirmedUpdate) {
+    // Ignore noise updates
+    return new Response(JSON.stringify({ ok: true, ignored: true }), {
+      status: 200,
+    });
+  }
+
+  // --- 4) Extract metadata
+  const meta = record.raw_user_meta_data ?? {};
+  const firstName = meta.first_name ?? meta.firstName ?? null;
+  const lastName = meta.last_name ?? meta.lastName ?? null;
+  const email = record.email ?? null;
+
+  // --- 5) Build queries (idempotent)
+  const queries: Promise<any>[] = [];
+
+  // profiles (always on INSERT)
+  if (isInsert) {
+    queries.push(
+      (async () =>
+        await supabase
+          .from("profiles")
+          .upsert(
+            {
+              id: userId,
+              first_name: firstName,
+              last_name: lastName,
+            },
+            { onConflict: "id" },
+          ).throwOnError())(),
     );
   }
 
-  // Perform upserts / inserts idempotently
-  try {
-    // 1) profiles upsert (id = auth.users.id)
-    const profilePayload: any = {
-      id: user.id,
-      created_at: new Date().toISOString(),
-    };
-    if (user.first_name) profilePayload.first_name = user.first_name;
-    if (user.last_name) profilePayload.last_name = user.last_name;
-
-    const p = await supabase
-      .from("profiles")
-      .upsert(profilePayload, { onConflict: "id" })
-      .select()
-      .maybeSingle();
-
-    if (p.error) {
-      console.error("profiles upsert error", p.error);
-      // continue – we still try other operations
+  // tenant-related tables only if tenant configured
+  if (DEFAULT_TENANT_ID) {
+    // user_tenants (INSERT only)
+    if (isInsert) {
+      queries.push(
+        (async () =>
+          await supabase
+            .from("user_tenants")
+            .upsert(
+              {
+                user_id: userId,
+                tenant_id: DEFAULT_TENANT_ID,
+                role: "student",
+              },
+              { onConflict: "user_id,tenant_id" },
+            ).throwOnError())(),
+      );
     }
 
-    // 2) user_tenants insert/upsert (user_id, tenant_id, role)
-    if (tenantId) {
-      const utPayload = {
-        user_id: user.id,
-        tenant_id: tenantId,
-        role: "student",
-        created_at: new Date().toISOString(),
-      };
-      const ut = await supabase
-        .from("user_tenants")
-        .upsert(utPayload, { onConflict: "user_id,tenant_id" })
-        .select()
-        .maybeSingle();
-      if (ut.error) {
-        console.error("user_tenants upsert error", ut.error);
-      }
-    }
+    // memberships (only when confirmed)
+    if (isConfirmedUpdate || (isInsert && emailConfirmed)) {
+      queries.push(
+        (async () =>
+          await supabase
+            .from("memberships")
+            .upsert(
+              {
+                user_id: userId,
+                tenant_id: DEFAULT_TENANT_ID,
+                status: "trialing",
+              },
+              { onConflict: "user_id,tenant_id" },
+            ).throwOnError())(),
+      );
 
-    // 3) memberships: create trialing membership if not exists
-    if (tenantId) {
-      const mPayload: any = {
-        user_id: user.id,
-        tenant_id: tenantId,
-        status: "trialing",
-        created_at: new Date().toISOString(),
-      };
-      // upsert on user_id + tenant_id
-      const m = await supabase
-        .from("memberships")
-        .upsert(mPayload, { onConflict: "user_id,tenant_id" })
-        .select()
-        .maybeSingle();
-      if (m.error) {
-        console.error("memberships upsert error", m.error);
-      }
+      // audit_log (idempotent via DB constraint recommended)
+      queries.push(
+        (async () =>
+          await supabase.from("audit_log").insert({
+            tenant_id: DEFAULT_TENANT_ID,
+            actor_user_id: userId,
+            event_type: "user_confirmed",
+            entity_type: "user",
+            entity_id: userId,
+            data: { email },
+          }).throwOnError())(),
+      );
     }
-
-    // 4) audit_log insert
-    const auditPayload = {
-      tenant_id: tenantId,
-      actor_user_id: user.id,
-      event_type: "user_confirmed",
-      entity_type: "user",
-      entity_id: user.id,
-      data: {
-        email: user.email,
-        metadata: user.metadata ?? {},
-      },
-      created_at: new Date().toISOString(),
-    };
-    const a = await supabase.from("audit_log").insert(auditPayload).select()
-      .maybeSingle();
-    if (a.error) {
-      console.error("audit_log insert error", a.error);
-    }
-
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
-  } catch (err: any) {
-    console.error("unexpected error in webhook handler", err);
-    return new Response(
-      JSON.stringify({ error: "internal_error", details: String(err) }),
-      { status: 500 },
-    );
   }
+
+  // --- 6) Execute queries in parallel
+  const results = await Promise.allSettled(queries);
+
+  const errors = results
+    .filter((r) => r.status === "rejected")
+    .map((r: any) => r.reason);
+
+  if (errors.length > 0) {
+    console.error("auth-webhook partial failure", errors);
+    // Still return 200 to avoid webhook retry storm
+  }
+
+  return new Response(JSON.stringify({ ok: true }), { status: 200 });
 }
