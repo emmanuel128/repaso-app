@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createAuthClient } from '@/lib/supabase';
 import type { LoginCredentials, AuthError } from '@repaso/sdk';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 export default function LoginPage() {
     const [credentials, setCredentials] = useState<LoginCredentials>({
@@ -33,7 +34,7 @@ export default function LoginPage() {
 
         try {
             const { user, error: authError } = await auth.signIn(credentials);
-            
+
             if (authError) {
                 setError(authError.message);
             } else if (user) {
@@ -55,40 +56,43 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center px-4">
+        <div className="min-h-screen bg-background flex items-center justify-center px-4">
+            <div className="fixed top-4 right-4 z-50">
+                <ThemeSwitcher />
+            </div>
             <div className="max-w-md w-full">
                 {/* Logo and Title */}
                 <div className="text-center mb-8">
                     <div className="mb-6">
-                        <h1 className="text-4xl font-bold text-[#1F2937] mb-2">
+                        <h1 className="text-4xl font-bold text-foreground mb-2">
                             Repaso
                         </h1>
-                        <div className="w-24 h-1 bg-gradient-to-r from-[#3B82F6] to-[#A78BFA] mx-auto rounded-full"></div>
+                        <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto rounded-full"></div>
                     </div>
-                    <h2 className="text-2xl font-semibold text-[#1F2937] mb-2">
+                    <h2 className="text-2xl font-semibold text-foreground mb-2">
                         Iniciar Sesión
                     </h2>
-                    <p className="text-[#6B7280]">
+                    <p className="text-text-secondary">
                         Preparación para la Reválida de Psicología
                     </p>
                 </div>
 
                 {/* Login Form */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="bg-background rounded-2xl shadow-lg border border-foreground/10 p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
-                            <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-4">
+                            <div className="bg-error/10 border border-error rounded-lg p-4">
                                 <div className="flex items-center">
-                                    <svg className="w-5 h-5 text-[#EF4444] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg className="w-5 h-5 text-error mr-3" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                     </svg>
-                                    <p className="text-[#EF4444] text-sm font-medium">{error}</p>
+                                    <p className="text-error text-sm font-medium">{error}</p>
                                 </div>
                             </div>
                         )}
 
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-[#1F2937] mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                                 Correo Electrónico
                             </label>
                             <input
@@ -98,14 +102,14 @@ export default function LoginPage() {
                                 value={credentials.email}
                                 onChange={handleInputChange}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent outline-none transition-all duration-200 bg-[#F9FAFB] hover:bg-white"
+                                className="w-full px-4 py-3 border border-foreground/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all duration-200 bg-background hover:bg-background"
                                 placeholder="ejemplo@correo.com"
                                 disabled={loading}
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-[#1F2937] mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
                                 Contraseña
                             </label>
                             <input
@@ -115,7 +119,7 @@ export default function LoginPage() {
                                 value={credentials.password}
                                 onChange={handleInputChange}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent outline-none transition-all duration-200 bg-[#F9FAFB] hover:bg-white"
+                                className="w-full px-4 py-3 border border-foreground/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all duration-200 bg-background hover:bg-background"
                                 placeholder="••••••••"
                                 disabled={loading}
                             />
@@ -127,15 +131,15 @@ export default function LoginPage() {
                                     id="remember-me"
                                     name="remember-me"
                                     type="checkbox"
-                                    className="h-4 w-4 text-[#3B82F6] focus:ring-[#3B82F6] border-gray-300 rounded"
+                                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                                 />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-[#6B7280]">
+                                <label htmlFor="remember-me" className="ml-2 block text-sm text-text-secondary">
                                     Recordarme
                                 </label>
                             </div>
 
                             <div className="text-sm">
-                                <a href="#" className="font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors">
+                                <a href="#" className="font-medium text-primary hover:text-secondary transition-colors">
                                     ¿Olvidaste tu contraseña?
                                 </a>
                             </div>
@@ -144,7 +148,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3B82F6] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                         >
                             {loading ? (
                                 <div className="flex items-center">
@@ -161,9 +165,9 @@ export default function LoginPage() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-[#6B7280]">
+                        <p className="text-text-secondary">
                             ¿No tienes cuenta?{' '}
-                            <a href="/signup" className="font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors">
+                            <a href="/signup" className="font-medium text-primary hover:text-secondary transition-colors">
                                 Regístrate aquí
                             </a>
                         </p>
@@ -172,7 +176,7 @@ export default function LoginPage() {
 
                 {/* Footer */}
                 <div className="mt-8 text-center">
-                    <p className="text-sm text-[#6B7280]">
+                    <p className="text-sm text-text-secondary">
                         © 2025 Repaso. Todos los derechos reservados.
                     </p>
                 </div>

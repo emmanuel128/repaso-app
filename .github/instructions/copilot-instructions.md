@@ -95,36 +95,38 @@ repaso-app/
 
 # 🎨 Paleta de Colores – Repaso Psicología PR
 
+Referencia única de colores: ver [apps/web/src/app/globals.css](apps/web/src/app/globals.css) para las variables CSS oficiales. Evita hardcodear hex y usa las variables.
+
 ## Colores Principales
-- **Primario:** `#3B82F6`
-- **Secundario:** `#A78BFA`
-- **Acento:** `#14B8A6`
+- **Primario:** `var(--primary)`
+- **Secundario:** `var(--secondary)`
+- **Acento:** `var(--accent)`
 
 ## Neutros
-- **Fondo Claro:** `#F9FAFB`
-- **Texto Primario / Fondo Oscuro:** `#1F2937`
-- **Texto Secundario:** `#6B7280`
+- **Fondo Claro:** `var(--background-light)`
+- **Texto Primario / Fondo Oscuro:** `var(--text-primary)` / `var(--background-dark)`
+- **Texto Secundario:** `var(--text-secondary)`
 
 ## Estados
-- **Éxito:** `#22C55E`
-- **Advertencia:** `#FACC15`
-- **Error:** `#EF4444`
+- **Éxito:** `var(--success)`
+- **Advertencia:** `var(--warning)`
+- **Error:** `var(--error)`
 
 ---
 
 ## Paleta en Bloques
 
-| Nombre | Color | Hex |
-|--------|--------|------|
-| Primario | ![#3B82F6](https://placehold.co/15x15/3B82F6/000000.png) | `#3B82F6` |
-| Secundario | ![#A78BFA](https://placehold.co/15x15/A78BFA/000000.png) | `#A78BFA` |
-| Acento | ![#14B8A6](https://placehold.co/15x15/14B8A6/000000.png) | `#14B8A6` |
-| Fondo Claro | ![#F9FAFB](https://placehold.co/15x15/F9FAFB/000000.png) | `#F9FAFB` |
-| Fondo Oscuro | ![#1F2937](https://placehold.co/15x15/1F2937/000000.png) | `#1F2937` |
-| Texto Secundario | ![#6B7280](https://placehold.co/15x15/6B7280/000000.png) | `#6B7280` |
-| Éxito | ![#22C55E](https://placehold.co/15x15/22C55E/000000.png) | `#22C55E` |
-| Advertencia | ![#FACC15](https://placehold.co/15x15/FACC15/000000.png) | `#FACC15` |
-| Error | ![#EF4444](https://placehold.co/15x15/EF4444/000000.png) | `#EF4444` |
+| Nombre | CSS Var |
+|--------|---------|
+| Primario | `var(--primary)` |
+| Secundario | `var(--secondary)` |
+| Acento | `var(--accent)` |
+| Fondo Claro | `var(--background-light)` |
+| Fondo Oscuro | `var(--background-dark)` |
+| Texto Secundario | `var(--text-secondary)` |
+| Éxito | `var(--success)` |
+| Advertencia | `var(--warning)` |
+| Error | `var(--error)` |
 
 ## 🧾 Convenciones de Commits
 Usa el formato: `<tipo>(área): descripción breve`

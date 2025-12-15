@@ -13,6 +13,18 @@
   --warning: #FACC15;
   --error: #EF4444;
 
+
+  /* --primary: #A0AB89;
+  --secondary: #5F6A4C;
+  --accent: #BD612A;
+  --background-light: #F9FAFB;
+  --background-dark: #1F2937;
+  --text-primary: #5F6A4C;
+  --text-secondary: #A0AB89;
+  --success: #A0AB89;
+  --warning: #E6B883;
+  --error: #BD612A; */
+  
   /* Default theme */
   --background: var(--background-light);
   --foreground: var(--text-primary);
@@ -37,6 +49,17 @@
     --background: var(--background-dark);
     --foreground: var(--background-light);
   }
+}
+
+/* Explicit theme overrides via data-theme attribute */
+html[data-theme="light"] {
+  --background: var(--background-light);
+  --foreground: var(--text-primary);
+}
+
+html[data-theme="dark"] {
+  --background: var(--background-dark);
+  --foreground: var(--background-light);
 }
 
 body {
