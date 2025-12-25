@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createAuthClient } from '@/lib/supabase';
 import type { User } from '@repaso/sdk';
@@ -135,9 +136,9 @@ export default function DashboardPage() {
                         <p className="text-text-secondary mb-6">
                             Practica con preguntas de la Reválida organizadas por temas
                         </p>
-                        <button className="w-full bg-primary hover:bg-secondary text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                            Iniciar Práctica
-                        </button>
+                        <Link href="/topics" className="w-full inline-block text-center bg-primary hover:bg-secondary text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                            Ver Temas
+                        </Link>
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

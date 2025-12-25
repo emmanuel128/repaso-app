@@ -27,7 +27,7 @@ $$;
 
 create or replace function jwt_role()
 returns text language sql stable as $$
-  select coalesce(jwt_claim('role'), '')
+  select coalesce(jwt_claim('user_role'), '')
 $$;
 
 create or replace function current_tenant_id()
@@ -53,6 +53,37 @@ $$;
 create or replace function is_instructor()
 returns boolean language sql stable as $$
   select jwt_role() in ('owner','admin','instructor')
+$$;
+
+create or replace function public.custom_access_token_hook(event jsonb)
+returns jsonb
+language plpgsql
+stable
+security definer -- Add this line to bypass RLS
+set search_path = public -- Security best practice for definer functions
+as $$
+  declare
+    _tenant_id uuid;
+    _role role_type;
+  begin
+
+    -- 1. Fetch values into variables
+    select ut.tenant_id, ut.role
+    into _tenant_id, _role
+    from public.user_tenants ut
+    where ut.user_id = (event ->> 'user_id')::uuid;
+
+    -- 2. Inject claims into the event object
+    -- If no record is found, it will just skip adding these specific claims
+    if _tenant_id is not null then
+      event := jsonb_set(event, '{claims, tenant_id}', to_jsonb(_tenant_id));
+      event := jsonb_set(event, '{claims, user_role}', to_jsonb(_role::text));
+    end if;
+    
+    -- RAISE LOG 'Auth Hook Output: %', event;
+
+    return event;
+  end;
 $$;
 
 -- =========================

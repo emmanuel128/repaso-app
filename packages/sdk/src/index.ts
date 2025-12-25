@@ -13,3 +13,14 @@ export type {
     Session,
     AuthError
 } from "./types";
+
+// Topics
+export { fetchTopics, fetchTopicsByArea } from "./topics";
+export type { Topic } from "./topics";
+
+// React hooks
+export { useAreasWithTopics } from "./hooks-areas";
+
+// Areas
+export { fetchAreas } from "./areas";
+export type { Area } from "./areas";

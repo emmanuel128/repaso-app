@@ -7,6 +7,11 @@
     "stop": "supabase stop",
     "migrate": "supabase migration up",
     "reset": "supabase db reset",
-    "seed": "psql \"$DB_URL\" -f ./seeds/seed.sql"
+    "deploy-function": "supabase functions deploy",
+    "seed": "psql \"$PROD_DB_URL\" -f ./seeds/seed.sql",
+    "deploy": "supabase db push --db-url \"$PROD_DB_URL\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.84.0"
   }
 }

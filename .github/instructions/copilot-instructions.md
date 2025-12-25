@@ -95,7 +95,7 @@ repaso-app/
 
 # 🎨 Paleta de Colores – Repaso Psicología PR
 
-Referencia única de colores: ver [apps/web/src/app/globals.css](apps/web/src/app/globals.css) para las variables CSS oficiales. Evita hardcodear hex y usa las variables.
+Referencia única de colores: ver [apps/web/src/app/globals.css](../../apps/web/src/app/globals.css) para las variables CSS oficiales. Evita hardcodear hex y usa las variables.
 
 ## Colores Principales
 - **Primario:** `var(--primary)`
