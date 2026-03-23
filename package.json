@@ -26,5 +26,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.76.1",
     "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "baseline-browser-mapping": "^2.10.10"
   }
 }
