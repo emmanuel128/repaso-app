@@ -1,169 +1,238 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { createAuthClient } from '@/lib/supabase';
-import type { User } from '@repaso/sdk';
-import ThemeSwitcher from '@/components/ThemeSwitcher';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { DashboardSnapshot } from "@repaso/sdk";
+import { fetchDashboardSnapshot } from "@repaso/sdk";
+import AppHeader from "@/components/AppHeader";
+import AccessNotice from "@/components/AccessNotice";
+import PageLoader from "@/components/PageLoader";
+import { createAuthClient, supabaseBrowser } from "@/lib/supabase";
+import { useStudentAccess } from "@/lib/student-access";
 
 export default function DashboardPage() {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
-    const auth = createAuthClient();
+  const router = useRouter();
+  const { loading: accessLoading, user, membership, allowed, error: accessError } = useStudentAccess();
+  const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null);
+  const [loadingSnapshot, setLoadingSnapshot] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            const { session } = await auth.getSession();
-            if (!session) {
-                router.push('/login');
-                return;
-            }
-
-            const { user } = await auth.getUser();
-            setUser(user);
-            setLoading(false);
-        };
-
-        checkAuth();
-    }, [auth, router]);
-
-    const handleSignOut = async () => {
-        await auth.signOut();
-        router.push('/login');
-    };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-text-secondary">Cargando...</p>
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    if (accessLoading || !allowed) {
+      return;
     }
 
+    const client = supabaseBrowser();
+    let mounted = true;
+
+    async function loadSnapshot() {
+      setLoadingSnapshot(true);
+      try {
+        const data = await fetchDashboardSnapshot(client);
+        if (!mounted) {
+          return;
+        }
+
+        setSnapshot(data);
+        setError(null);
+      } catch (loadError) {
+        if (!mounted) {
+          return;
+        }
+
+        setError(loadError instanceof Error ? loadError.message : "No fue posible cargar tu progreso.");
+      } finally {
+        if (mounted) {
+          setLoadingSnapshot(false);
+        }
+      }
+    }
+
+    loadSnapshot();
+
+    return () => {
+      mounted = false;
+    };
+  }, [accessLoading, allowed]);
+
+  async function handleSignOut() {
+    const auth = createAuthClient();
+    await auth.signOut();
+    router.replace("/login");
+  }
+
+  if (accessLoading) {
+    return <PageLoader label="Validando acceso..." />;
+  }
+
+  if (!allowed) {
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-foreground">Repaso</h1>
-                            <div className="w-16 h-1 bg-gradient-to-r from-primary to-accent ml-2 rounded-full"></div>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                            <span className="text-text-secondary text-sm">
-                                Bienvenido, {user?.email}
-                            </span>
-                            <ThemeSwitcher />
-                            <button
-                                onClick={handleSignOut}
-                                className="text-primary hover:text-secondary text-sm font-medium transition-colors"
-                            >
-                                Cerrar Sesión
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Welcome Section */}
-                <div className="bg-gradient-to-r from-primary to-accent rounded-2xl p-8 mb-8 text-white">
-                    <h2 className="text-3xl font-bold mb-4">
-                        ¡Bienvenido a Repaso!
-                    </h2>
-                    <p className="text-lg opacity-90">
-                        Tu plataforma de preparación para la Reválida de Psicología en Puerto Rico
-                    </p>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex items-center">
-                            <div className="bg-primary/10 p-3 rounded-lg">
-                                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <h3 className="text-lg font-semibold text-foreground">Preguntas Completadas</h3>
-                                <p className="text-2xl font-bold text-primary">0</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex items-center">
-                            <div className="bg-success/10 p-3 rounded-lg">
-                                <svg className="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <h3 className="text-lg font-semibold text-foreground">Progreso</h3>
-                                <p className="text-2xl font-bold text-success">0%</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex items-center">
-                            <div className="bg-accent/10 p-3 rounded-lg">
-                                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <h3 className="text-lg font-semibold text-foreground">Tiempo Estudiado</h3>
-                                <p className="text-2xl font-bold text-accent">0h</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 className="text-xl font-semibold text-foreground mb-4">Comenzar Práctica</h3>
-                        <p className="text-text-secondary mb-6">
-                            Practica con preguntas de la Reválida organizadas por temas
-                        </p>
-                        <Link href="/topics" className="w-full inline-block text-center bg-primary hover:bg-secondary text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                            Ver Temas
-                        </Link>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 className="text-xl font-semibold text-foreground mb-4">Examen Simulacro</h3>
-                        <p className="text-text-secondary mb-6">
-                            Toma un examen completo bajo condiciones similares a la Reválida
-                        </p>
-                        <button className="w-full bg-accent hover:bg-secondary text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                            Comenzar Simulacro
-                        </button>
-                    </div>
-                </div>
-
-                {/* Recent Activity */}
-                <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 className="text-xl font-semibold text-foreground mb-4">Actividad Reciente</h3>
-                    <div className="text-center py-8">
-                        <svg className="w-12 h-12 text-text-secondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <p className="text-text-secondary">No hay actividad reciente</p>
-                        <p className="text-sm text-text-secondary mt-2">Comienza a practicar para ver tu progreso aquí</p>
-                    </div>
-                </div>
-            </main>
-        </div>
+      <AccessNotice
+        title="Acceso restringido"
+        message={accessError ?? "Necesitas una membresía activa o en prueba para continuar estudiando."}
+      />
     );
+  }
+
+  if (loadingSnapshot) {
+    return <PageLoader label="Cargando tu dashboard..." />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <AppHeader
+        title="Dashboard"
+        subtitle="Tu centro de práctica para la Reválida de Psicología"
+        rightSlot={
+          <button
+            onClick={handleSignOut}
+            className="text-sm font-medium text-primary hover:text-secondary transition-colors"
+          >
+            Cerrar sesión
+          </button>
+        }
+      />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <section className="bg-gradient-to-r from-primary to-accent rounded-3xl p-8 text-white">
+          <p className="text-sm uppercase tracking-[0.25em] opacity-80 mb-3">Student MVP</p>
+          <h2 className="text-3xl font-bold mb-3">
+            {user?.user_metadata?.full_name ? `Hola, ${user.user_metadata.full_name}` : `Hola, ${user?.email}`}
+          </h2>
+          <p className="text-white/90 max-w-2xl">
+            Tu membresía está en estado <span className="font-semibold">{membership?.status ?? "desconocido"}</span>. Continúa practicando por tema, revisa tus resultados y detecta en qué áreas necesitas más repaso.
+          </p>
+        </section>
+
+        {error ? (
+          <div className="bg-error/10 border border-error rounded-2xl p-4 text-error">{error}</div>
+        ) : null}
+
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <article className="bg-white rounded-2xl shadow-sm border border-foreground/10 p-6">
+            <p className="text-sm uppercase tracking-[0.2em] text-text-secondary mb-3">Preguntas respondidas</p>
+            <p className="text-4xl font-bold text-foreground">{snapshot?.completedQuestions ?? 0}</p>
+          </article>
+          <article className="bg-white rounded-2xl shadow-sm border border-foreground/10 p-6">
+            <p className="text-sm uppercase tracking-[0.2em] text-text-secondary mb-3">Precisión</p>
+            <p className="text-4xl font-bold text-success">{snapshot?.accuracy ?? 0}%</p>
+          </article>
+          <article className="bg-white rounded-2xl shadow-sm border border-foreground/10 p-6">
+            <p className="text-sm uppercase tracking-[0.2em] text-text-secondary mb-3">Temas trabajados</p>
+            <p className="text-4xl font-bold text-accent">{snapshot?.topicsStudied ?? 0}</p>
+          </article>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
+          <article className="bg-white rounded-2xl shadow-sm border border-foreground/10 p-6">
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">Progreso por tema</h3>
+                <p className="text-text-secondary">Tu desempeño reciente según los intentos ya corregidos.</p>
+              </div>
+              <Link href="/topics" className="text-sm font-medium text-primary hover:text-secondary transition-colors">
+                Ver todos los temas
+              </Link>
+            </div>
+
+            {snapshot?.progressByTopic.length ? (
+              <div className="space-y-4">
+                {snapshot.progressByTopic.map((row) => {
+                  const total = row.total_correct + row.total_incorrect;
+                  const accuracy = total > 0 ? Math.round((row.total_correct / total) * 100) : 0;
+
+                  return (
+                    <div key={row.topic_id} className="rounded-2xl border border-foreground/10 p-4">
+                      <div className="flex items-center justify-between gap-4 mb-2">
+                        <div>
+                          <p className="font-semibold text-foreground">{row.topics?.name ?? "Tema"}</p>
+                          <p className="text-sm text-text-secondary">
+                            {row.total_correct} correctas · {row.total_incorrect} incorrectas
+                          </p>
+                        </div>
+                        {row.topics?.slug ? (
+                          <Link href={`/topics/${row.topics.slug}`} className="text-sm text-primary hover:text-secondary transition-colors">
+                            Abrir tema
+                          </Link>
+                        ) : null}
+                      </div>
+                      <div className="h-3 rounded-full bg-background overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-primary to-accent" style={{ width: `${accuracy}%` }} />
+                      </div>
+                      <p className="text-sm text-text-secondary mt-2">
+                        Precisión acumulada: <span className="font-medium text-foreground">{accuracy}%</span>
+                        {row.last_score != null ? ` · Último intento ${Math.round(row.last_score)}%` : ""}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-foreground/15 p-6 text-text-secondary">
+                Aún no has completado intentos. Empieza por un tema para generar tu primer resultado.
+              </div>
+            )}
+          </article>
+
+          <article className="bg-white rounded-2xl shadow-sm border border-foreground/10 p-6">
+            <h3 className="text-xl font-semibold text-foreground mb-2">Actividad reciente</h3>
+            <p className="text-text-secondary mb-6">Tus últimos intentos corregidos y listos para revisar.</p>
+
+            {snapshot?.recentAttempts.length ? (
+              <div className="space-y-4">
+                {snapshot.recentAttempts.map((attempt) => {
+                  const percentage = attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : 0;
+
+                  return (
+                    <div key={attempt.id} className="rounded-2xl border border-foreground/10 p-4">
+                      <p className="font-semibold text-foreground">
+                        {attempt.practice_sessions?.topics?.name ?? "Práctica"}
+                      </p>
+                      <p className="text-sm text-text-secondary mb-3">
+                        Resultado: {percentage}% · {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleString("es-PR") : "Sin fecha"}
+                      </p>
+                      <div className="flex items-center gap-4">
+                        <Link href={`/attempts/${attempt.id}`} className="text-sm font-medium text-primary hover:text-secondary transition-colors">
+                          Revisar respuestas
+                        </Link>
+                        {attempt.practice_sessions?.topics?.slug ? (
+                          <Link href={`/topics/${attempt.practice_sessions.topics.slug}/practice`} className="text-sm text-text-secondary hover:text-foreground transition-colors">
+                            Repetir tema
+                          </Link>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-foreground/15 p-6 text-text-secondary">
+                Todavía no hay intentos recientes para mostrar.
+              </div>
+            )}
+          </article>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <article className="bg-white rounded-2xl shadow-sm border border-foreground/10 p-6">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Comenzar práctica por tema</h3>
+            <p className="text-text-secondary mb-5">
+              Entra a un tema para repasar notas, ver casos clínicos y resolver preguntas con retroalimentación inmediata.
+            </p>
+            <Link href="/topics" className="inline-flex items-center justify-center rounded-full bg-primary hover:bg-secondary text-white px-5 py-3 font-medium transition-colors">
+              Explorar temas
+            </Link>
+          </article>
+
+          <article className="bg-white rounded-2xl shadow-sm border border-foreground/10 p-6">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Qué ya implementa este MVP</h3>
+            <p className="text-text-secondary leading-7">
+              Acceso de estudiante, navegación por temas, práctica corregida, revisión de explicaciones y métricas reales de progreso a partir de tus intentos.
+            </p>
+          </article>
+        </section>
+      </main>
+    </div>
+  );
 }
