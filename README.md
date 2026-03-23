@@ -10,8 +10,8 @@ Plataforma educativa para repasar y prepararse para exámenes profesionales. Ini
 
 | Área | Tecnología |
 |------|-------------|
-| Web | Next.js + TailwindCSS + shadcn/ui |
-| Mobile | Expo (React Native) (futuro) |
+| Web | Next.js 16 + React 19 + Tailwind CSS v4 |
+| Mobile | Expo / React Native (planeado, aún no implementado) |
 | Backend | Supabase (Postgres, Auth, Storage, Edge Functions) |
 | Lenguaje | TypeScript |
 | Monorepo | npm Workspaces |
@@ -20,69 +20,55 @@ Plataforma educativa para repasar y prepararse para exámenes profesionales. Ini
 
 ## 🧩 Estructura del Proyecto (Monorepo)
 
-Scaffolding inicial listo para iniciar desarrollo.
+Estado actual del monorepo.
 
 ```bash
 repaso-app/
 │
 ├── infra/
-│   ├── database/                  # 🗄️ Backend (DB, auth, storage, migrations, seeds)
-│   │   ├── .env                   # Variables de entorno locales (no commitear)
-│   │   ├── .gitignore
-│   │   ├── package.json
-│   │   └── supabase/
-│   │       ├── config.toml
-│   │       ├── migrations/
-│   │       │   └── 20251026_init.sql
-│   │       ├── seeds/
-│   │       │   └── seed.sql
-│   │       ├── functions/         # Edge Functions (serverless logic)
+│   └── database/                  # 🗄️ Backend (migraciones, seeds y Edge Functions)
+│       ├── package.json
+│       └── supabase/
+│           ├── migrations/
+│           │   └── 20251026_init.sql
+│           ├── seeds/
+│           │   └── seed.sql
+│           └── functions/
+│               ├── auth-webhook/
+│               └── hello/
 │
 ├── apps/                          # 🌐📱 Frontends
-│   ├── web/                       # Next.js app (SSR + PWA)
-│   │   ├── next.config.js
+│   ├── web/                       # Next.js app
+│   │   ├── next.config.ts
 │   │   ├── package.json
+│   │   ├── agent.md
 │   │   └── src/
-│   │       ├── pages/
+│   │       ├── app/
 │   │       ├── components/
 │   │       ├── lib/
-│   │       ├── hooks/
-│   │       └── utils/
+│   │       └── proxy.ts
 │   │
-│   ├── mobile/                    # Expo app (React Native) (future development)
-│   │   ├── app.config.ts
-│   │   ├── package.json
-│   │   └── src/
-│   │       ├── screens/
-│   │       ├── components/        # comparte UI con web
-│   │       ├── hooks/             # comparte lógica (useAuth, useProgress, etc.)
-│   │       ├── lib/
-│   │       ├── utils/
-│   │       └── navigation/
+│   └── mobile/                    # Placeholder para futura app Expo
+│       ├── .gitkeep
+│       └── agent.md
 │
-├── packages/                      # 🧩 Código compartido entre web y móvil
-│   ├── ui/                        # Componentes reutilizables (botones, inputs, modales)
-│   ├── lib/                       # Conexión Supabase, lógica de negocio
-│   ├── hooks/                     # useAuth, useProgress, etc.
-│   ├── types/                     # Tipos TypeScript comunes
-│   └── utils/                     # Funciones helper
+├── packages/                      # 🧩 Código compartido
+│   ├── db/
+│   ├── sdk/
+│   └── ui/
 │
 ├── .github/
-│   └── workflows/
-│       ├── supabase-migrations.yml
-│       ├── web-deploy.yml
-│       └── mobile-build.yml
+│   └── instructions/
+│       └── copilot-instructions.md
 │
 ├── docs/
-│   ├── architecture.md
 │   ├── data-model.md
-│   └── deployment-guide.md
+│   └── project-context.md
 │
-├── package.json                   # Usa npm workspaces
-├── .env.example
-├── tsconfig.json
+├── package.json
 └── README.md
-````
+```
+
 ## Diagrama
 ```mermaid
 graph TD
@@ -121,14 +107,16 @@ npm run dev:web
 6️⃣ Ejecutar la app móvil
 ```bash
 npm run dev:mobile
-# o dentro de apps/mobile -> npx expo start
 ```
+
+Nota: `apps/mobile` todavía no tiene implementación ni `package.json`, así que este comando no funcionará hasta que se cree el scaffold móvil.
 
 7️⃣ Instancia local de Supabase (opcional)
 ```bash
-npm run supabase:start
-npm run supabase:push
-npm run supabase:stop
+npm run db:start
+npm run db:migrate
+npm run db:reset
+npm run db:stop
 ```
 
 ---
@@ -149,11 +137,15 @@ npm run supabase:stop
 | Comando | Acción |
 |---------|--------|
 | `npm run dev:web` | Dev server Next.js |
-| `npm run dev:mobile` | Inicia Expo |
-| `npm run supabase:start` | Supabase local |
-| `npm run supabase:push` | Aplica migraciones |
-| `npm run lint` | Linter monorepo (config por definir) |
-| `npm run typecheck` | TypeScript project references |
+| `npm run dev:mobile` | Reservado para futura app móvil |
+| `npm run dev:all` | Ejecuta todos los `dev` disponibles por workspace |
+| `npm run build:all` | Build de workspaces con script `build` |
+| `npm run lint:all` | Lint de workspaces con script `lint` |
+| `npm run typecheck` | Typecheck de workspaces con script `typecheck` |
+| `npm run db:start` | Inicia Supabase local |
+| `npm run db:migrate` | Aplica migraciones locales |
+| `npm run db:reset` | Resetea DB local y reaplica seeds |
+| `npm run db:stop` | Detiene Supabase local |
 
 ---
 
@@ -173,6 +165,6 @@ Convenciones:
 ## 🔐 Seguridad & Buenas Prácticas
 
 - No exponer `SERVICE_ROLE_KEY` en cliente (web/mobile).
-- Implementar RLS en tablas sensibles (pendiente).
+- La autorización depende de Supabase Auth, JWT claims y RLS en las tablas de aplicación.
 - Reutilizar lógica en paquetes compartidos para evitar duplicación.
 - Todo contenido para la Revalida en español y terminología consistente.

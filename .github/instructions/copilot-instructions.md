@@ -3,12 +3,12 @@
 Estas instrucciones permiten que un agente de IA sea productivo rápidamente en este monorepo de examen educativo.
 
 ## 🏗 Arquitectura General
-- Monorepo con tres dominios principales: `web/` (Next.js), `mobile/` (Expo/React Native) y `supabase/` (SQL migraciones, funciones edge, seeds).
+- Monorepo con tres dominios principales: `apps/web` (Next.js), `apps/mobile` (placeholder para Expo/React Native) e `infra/database/supabase` (migraciones SQL, funciones edge y seeds).
 - Backend "serverless" apoyado en Supabase (Auth, Postgres, Storage, Edge Functions); evita construir un backend Express a menos que sea imprescindible.
-- Diseño whitelabel: núcleo de lógica debe ser parametrizable por "examen" (ej: psicología, maestros). Mantén configuraciones separables.
+- Diseño whitelabel: el núcleo de lógica debe ser parametrizable por tenant/examen. Mantén configuraciones separables.
 
 ## 📁 Patrones de Organización
-- Features se agrupan por dominio (web/mobile). Reutiliza lógica transversal moviéndola a paquetes compartidos (crear `packages/` si crece la duplicación).
+- Features se agrupan por dominio. Reutiliza lógica transversal en `packages/*`.
 - Usa nombres de ramas `feature/<descripcion-corta>`, `fix/<issue>`, `chore/<tarea>`.
 - Variables sensibles en `.env` (nunca hardcode). Provee claves públicas (anon) y privadas (service role) separadas.
 
@@ -17,61 +17,47 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
 repaso-app/
 │
 ├── infra/
-│   ├── database/                  # 🗄️ Backend (DB, auth, storage, migrations, seeds)
-│   │   ├── .env                   # Variables de entorno locales (no commitear)
-│   │   ├── package.json
-│   │   └── supabase/
-│   │       ├── migrations/
-│   │       │   └── 20251026_init.sql
-│   │       ├── seeds/
-│   │       │   └── seed.sql
-│   │       ├── functions/         # Edge Functions (serverless logic)
+│   └── database/
+│       ├── package.json
+│       └── supabase/
+│           ├── migrations/
+│           │   └── 20251026_init.sql
+│           ├── seeds/
+│           │   └── seed.sql
+│           └── functions/
+│               ├── auth-webhook/
+│               └── hello/
 │
 ├── apps/                          # 🌐📱 Frontends
-│   ├── web/                       # Next.js app (SSR + PWA)
-│   │   ├── next.config.js
+│   ├── web/                       # Next.js 16 app router
+│   │   ├── next.config.ts
 │   │   ├── package.json
 │   │   └── src/
-│   │       ├── pages/
+│   │       ├── app/
 │   │       ├── components/
 │   │       ├── lib/
-│   │       ├── hooks/
-│   │       └── utils/
+│   │       └── proxy.ts
 │   │
-│   ├── mobile/                    # Expo app (React Native) (future development)
-│   │   ├── app.config.ts
-│   │   ├── package.json
-│   │   └── src/
-│   │       ├── screens/
-│   │       ├── components/        # comparte UI con web
-│   │       ├── hooks/             # comparte lógica (useAuth, useProgress, etc.)
-│   │       ├── lib/
-│   │       ├── utils/
-│   │       └── navigation/
+│   └── mobile/                    # Aún sin scaffold real
+│       ├── .gitkeep
+│       └── agent.md
 │
-├── packages/                      # 🧩 Código compartido entre web y móvil
-│   ├── ui/                        # Componentes reutilizables (botones, inputs, modales)
-│   ├── lib/                       # Conexión Supabase, lógica de negocio
-│   ├── hooks/                     # useAuth, useProgress, etc.
-│   ├── types/                     # Tipos TypeScript comunes
-│   └── utils/                     # Funciones helper
+├── packages/
+│   ├── db/
+│   ├── sdk/
+│   └── ui/
 │
 ├── .github/
-│   └── workflows/
-│       ├── supabase-migrations.yml
-│       ├── web-deploy.yml
-│       └── mobile-build.yml
+│   └── instructions/
+│       └── copilot-instructions.md
 │
 ├── docs/
-│   ├── architecture.md
 │   ├── data-model.md
-│   └── deployment-guide.md
+│   └── project-context.md
 │
-├── package.json                   # Usa npm workspaces
-├── .env.example
-├── tsconfig.json
+├── package.json
 └── README.md
-````
+```
 
 ## 🧪 Flujo de Desarrollo
 1. Instalar dependencias del monorepo:
@@ -80,18 +66,19 @@ repaso-app/
    ```
    Esto instala dependencias compartidas y de cada app.
 2. Ejecutar entorno local:
-    - Web: `cd apps/web && npm run dev`
-    - Mobile: `cd apps/mobile && npx expo start`
-    - Supabase local (si se edita schema): `cd infra/database && npm start`
-    - Para entorno local completo de Supabase:
-       ```bash
-       cd infra/database
-       npm start      # Iniciar Supabase local
-       npm run migrate    # Aplicar migraciones locales
-       npm run stop       # Detener la instancia
-       ```
-3. Migraciones: editar en `infra/database/supabase/migrations/` y aplicar con `npm run migrate`.
-4. Commit temprano y frecuente. PR dispara CI (lint, build, test, deploy).
+    - Web: `npm run dev:web`
+    - Mobile: `npm run dev:mobile` solo cuando exista el scaffold móvil
+    - Supabase local:
+      ```bash
+      npm run db:start
+      npm run db:migrate
+      npm run db:stop
+      ```
+3. Migraciones: editar en `infra/database/supabase/migrations/` y aplicar con `npm run db:migrate`.
+4. Documentación de contexto:
+    - `docs/project-context.md` para el panorama general
+    - `docs/data-model.md` para el modelo de datos
+5. Commit temprano y frecuente.
 
 # 🎨 Paleta de Colores – Repaso Psicología PR
 
@@ -135,44 +122,43 @@ Ejemplo: `feat(auth): agregar recuperación de contraseña`
 Tipos: feat | fix | chore | docs | test | refactor
 
 ## 🔌 Integraciones Clave
-- Autenticación y roles: via Supabase Auth + tablas de perfiles; cuando añadas nuevos roles usa ENUM/tabla lookup en migración.
-- Contenido (preguntas, tópicos, casos): tablas normalizadas; evita duplicación creando relaciones (ej: `preguntas_tematicas`).
-- Pagos (futuro): planificar estructura `subscriptions` y `transactions` antes de integrar Stripe.
+- Autenticación y roles: Supabase Auth + `profiles` + `user_tenants` + JWT claims inyectados por `custom_access_token_hook`.
+- Contenido: el modelo actual incluye `areas`, `topics`, `topic_notes`, `mnemonics`, `cases`, `questions`, `question_options`, `tags`, `quizzes` y tablas de intentos/progreso.
+- Pagos: el esquema actual ya incluye `memberships` y `payment_events`.
 
 ## 🎨 Frontend (web/mobile) Conventions
-- TypeScript estricto para modelos (define interfaces en `/web/src/types/` o similar).
-- Estilos web: Tailwind + shadcn/ui. Prefiere componentes composables, evita CSS inline salvo para overrides rápidos.
-- React Query / SWR (si se introduce data fetching) debe centralizar caché; si no presente, sugiere adoptarlo antes de reimplementar lógica ad-hoc.
+- TypeScript estricto.
+- Estilos web: Tailwind CSS v4. Usa las variables CSS definidas en `apps/web/src/app/globals.css` (`--primary`, `--secondary`, `--accent`, etc.) en lugar de hardcodear colores.
+- La app web usa App Router; mantén la estructura en `apps/web/src/app`.
+- React Query / SWR no forman parte del stack actual; no los introduzcas por defecto sin una necesidad clara.
 - Manejo de estado global mínimo; preferir hooks por feature.
 
 ## 🗃 Datos y Migraciones
-- Cada nueva feature que requiere datos: agregar migración SQL en `infra/supabase/supabase/migrations/` con nombre timestamp + descripción.
-- Seeds: crear scripts para datos base (roles, exámenes) en `infra/supabase/supabase/seeds/seed.sql` reutilizables en entornos.
+- Cada nueva feature que requiere datos: agregar migración SQL en `infra/database/supabase/migrations/` con nombre timestamp + descripción.
+- Seeds: usar `infra/database/supabase/seeds/seed.sql` o nuevos archivos coherentes con el flujo de Supabase CLI.
+
 ## 🗃 Estructura recomendada para Supabase
 
 ```
-infra/supabase/
-   .env
-   .gitignore
+infra/database/
    package.json
    supabase/
-      config.toml
       migrations/
          <timestamp>_init.sql
       seeds/
          seed.sql
+      functions/
 ```
 
-Incluye `.env` para `$DB_URL` local si usas scripts personalizados.
-- Cuando sea necesario, crear cambios destructivos.
+Incluye cambios destructivos solo cuando sean realmente necesarios y explícitos en migraciones nuevas.
 
 ## 🌍 Convención de Idioma
 - Todas las **entidades (tablas, columnas, modelos, interfaces y relaciones)** deben definirse **en inglés** para mantener consistencia con convenciones internacionales y facilitar integración con herramientas externas.
 - Los textos visibles para el usuario final (ej. preguntas, instrucciones, labels) pueden mantenerse en español.
 
 ## 🛡 Calidad y CI
-- PR debe pasar: Lint, Build, Tests. Si falla migración, revisar orden y dependencias de constraints.
-- Agente puede sugerir nueva acción en GitHub Actions workflow (`.github/workflows/`) pero mantén pasos idempotentes.
+- Valida al menos los comandos relevantes al área cambiada: web (`lint`, `typecheck`, `build`) o base de datos (`db:migrate`, `db:reset` cuando aplique).
+- Si se agregan workflows en `.github/workflows/`, mantén los pasos idempotentes.
 
 ## 🧩 Ejemplos de Tareas para IA
 ```text
@@ -185,6 +171,8 @@ Incluye `.env` para `$DB_URL` local si usas scripts personalizados.
 - Duplicar lógica de acceso a Supabase en múltiples componentes (extrae util compartido).
 - Mezclar claves service role en cliente web/mobile: solo en funciones seguras (Edge/Server).
 - Hardcode de textos que deberían ser configurables por examen.
+- Tratar `apps/mobile` como si ya estuviera implementado.
+- Contradecir el esquema SQL o la documentación de `docs/data-model.md`.
 
 ## ✅ Principios
 - Parametrización > hardcode.
