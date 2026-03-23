@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createAuthClient } from '@/lib/supabase';
-import type { LoginCredentials, AuthError } from '@repaso/sdk';
+import type { LoginCredentials } from '@repaso/sdk';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 export default function LoginPage() {
@@ -14,18 +14,18 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const auth = createAuthClient();
 
     useEffect(() => {
         // Check if user is already authenticated
         const checkAuth = async () => {
+            const auth = createAuthClient();
             const { session } = await auth.getSession();
             if (session) {
                 router.push('/dashboard');
             }
         };
         checkAuth();
-    }, [auth, router]);
+    }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,6 +33,7 @@ export default function LoginPage() {
         setError(null);
 
         try {
+            const auth = createAuthClient();
             const { user, error: authError } = await auth.signIn(credentials);
 
             if (authError) {
@@ -40,7 +41,7 @@ export default function LoginPage() {
             } else if (user) {
                 router.push('/dashboard');
             }
-        } catch (err) {
+        } catch {
             setError('Error inesperado. Por favor, intenta de nuevo.');
         } finally {
             setLoading(false);

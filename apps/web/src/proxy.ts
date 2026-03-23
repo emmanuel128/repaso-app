@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-export function proxy(req: NextRequest) {
+export function proxy() {
   // TODO: resolver tenant por dominio y validar sesión/membership
   return NextResponse.next();
 }
