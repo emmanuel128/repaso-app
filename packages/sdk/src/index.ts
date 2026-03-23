@@ -9,6 +9,8 @@ export type {
     LoginCredentials,
     SignUpCredentials,
     AuthResult,
+    Membership,
+    MembershipStatus,
     User,
     Session,
     AuthError
@@ -17,6 +19,34 @@ export type {
 // Topics
 export { fetchTopics, fetchTopicsByArea } from "./topics";
 export type { Topic } from "./topics";
+
+// Topic content
+export { fetchTopicBySlug, fetchTopicDetail } from "./topic-content";
+export type { TopicDetail, TopicNote, Mnemonic, CaseStudy, UserTopicProgress } from "./topic-content";
+
+// Membership
+export { ACTIVE_MEMBERSHIP_STATUSES, fetchMemberships, fetchCurrentMembership, hasStudentAccess } from "./memberships";
+
+// Practice
+export {
+    createPracticeSession,
+    fetchTopicPracticeQuestions,
+    submitPracticeAttempt,
+    fetchAttemptReview,
+} from "./practice";
+export type {
+    PracticeSession,
+    PracticeQuestion,
+    PracticeQuestionOption,
+    SelectedAnswer,
+    PracticeSubmissionSummary,
+    AttemptReviewQuestion,
+    AttemptReviewOption,
+} from "./practice";
+
+// Dashboard
+export { fetchDashboardSnapshot } from "./dashboard";
+export type { DashboardSnapshot, DashboardProgressRow, DashboardAttemptRow } from "./dashboard";
 
 // React hooks
 export { useAreasWithTopics } from "./hooks-areas";
