@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { fetchTopicDetail, type TopicDetail } from "@repaso/sdk";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
+import MarkdownContent from "@/components/MarkdownContent";
 import PageLoader from "@/components/PageLoader";
 import { supabaseBrowser } from "@/lib/supabase";
 import { useStudentAccess } from "@/lib/student-access";
@@ -129,7 +130,7 @@ export default function TopicDetailPage() {
                 {detail.notes.map((note) => (
                   <div key={note.id} className="rounded-2xl border border-foreground/10 p-5">
                     <h3 className="font-semibold text-foreground mb-2">{note.title}</h3>
-                    <p className="text-text-secondary leading-7 whitespace-pre-line">{note.content_md}</p>
+                    <MarkdownContent content={note.content_md} />
                   </div>
                 ))}
               </div>
@@ -146,7 +147,7 @@ export default function TopicDetailPage() {
                   {detail.mnemonics.map((mnemonic) => (
                     <div key={mnemonic.id} className="rounded-2xl bg-background p-4">
                       <h3 className="font-semibold text-foreground mb-2">{mnemonic.title}</h3>
-                      <p className="text-text-secondary leading-7 whitespace-pre-line">{mnemonic.content_md}</p>
+                      <MarkdownContent content={mnemonic.content_md} />
                     </div>
                   ))}
                 </div>
@@ -162,7 +163,7 @@ export default function TopicDetailPage() {
                   {detail.cases.map((caseItem) => (
                     <div key={caseItem.id} className="rounded-2xl bg-background p-4">
                       <h3 className="font-semibold text-foreground mb-2">{caseItem.title}</h3>
-                      <p className="text-text-secondary leading-7 whitespace-pre-line">{caseItem.body_md}</p>
+                      <MarkdownContent content={caseItem.body_md} />
                     </div>
                   ))}
                 </div>
