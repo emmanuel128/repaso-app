@@ -4,7 +4,7 @@
 This document describes the current PostgreSQL data model used by Repaso in Supabase.
 
 - Source of truth: `infra/database/supabase/migrations/20251026_init.sql`
-- Seed data: `infra/database/supabase/seeds/seed.sql`
+- Seed data: `infra/database/supabase/seeds/*.sql`
 - Architecture: multi-tenant, with tenant-scoped business tables
 - Naming: database columns and tables use `snake_case`
 - Identity: application users are anchored to `auth.users`; profile and tenant membership data live in `public`
@@ -854,7 +854,7 @@ All documented tables have RLS enabled.
   - instructors and above can write within the tenant
 
 ## Seeded Baseline Data
-The seed file creates a minimal default tenant setup.
+The ordered seed files create a minimal default tenant setup.
 
 ### Default tenant
 
@@ -871,7 +871,7 @@ The seed file creates a minimal default tenant setup.
 - area: `General`
 - topic: `Introductions`
 
-This seed exists for local/bootstrap use and is not a substitute for full curriculum content.
+These seeds exist for local/bootstrap use and are not a substitute for full curriculum content.
 
 ## Current Gaps and Implicit Rules
 These are not enforced by the database today, but they are important application-level considerations.

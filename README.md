@@ -32,7 +32,8 @@ repaso-app/
 │           ├── migrations/
 │           │   └── 20251026_init.sql
 │           ├── seeds/
-│           │   └── seed.sql
+│           │   ├── 00_tenant_bootstrap.sql
+│           │   └── ...
 │           └── functions/
 │               ├── auth-webhook/
 │               └── hello/
