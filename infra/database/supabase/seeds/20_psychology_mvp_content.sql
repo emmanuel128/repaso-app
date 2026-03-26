@@ -5,15 +5,27 @@ values
     '11111111-1111-1111-1111-111111111111',
     '30000000-0000-0000-0000-000000000001',
     'Confidencialidad y excepciones',
-    'La confidencialidad es la regla general, pero puede limitarse cuando existe **riesgo inminente**, mandato legal o autorización informada del paciente. Para la Reválida, distingue entre compartir información útil para tratamiento y divulgar información innecesaria.',
+    'La **confidencialidad** es la norma. Se limita solo cuando hay **riesgo inminente**, mandato legal o autorización válida del paciente.
+
+Para preguntas de reválida, distingue entre:
+- divulgar lo **mínimo necesario** para proteger o coordinar tratamiento
+- compartir información **innecesaria** o fuera del propósito clínico',
     'published'
   ),
   (
     '40000000-0000-0000-0000-000000000002',
     '11111111-1111-1111-1111-111111111111',
     '30000000-0000-0000-0000-000000000002',
-    'Diferencial rápido entre ansiedad y depresión',
-    'Evalúa duración, intensidad, deterioro funcional y si los síntomas centrales son **preocupación/activación fisiológica** o **ánimo deprimido/anhedonia**. El diagnóstico correcto depende del patrón predominante y su curso.',
+    'Ansiedad vs. depresión: diferencial rápido',
+    'Compara cuatro ejes:
+- **síntoma central**
+- **duración**
+- **intensidad**
+- **deterioro funcional**
+
+La **ansiedad** suele organizarse alrededor de preocupación, hipervigilancia y activación fisiológica. La **depresión** suele organizarse alrededor de ánimo deprimido, anhedonia y enlentecimiento.
+
+El diagnóstico se define por el **patrón predominante y su curso**, no por un síntoma aislado.',
     'published'
   ),
   (
@@ -21,7 +33,16 @@ values
     '11111111-1111-1111-1111-111111111111',
     '30000000-0000-0000-0000-000000000003',
     'Seleccionar intervención',
-    'La intervención debe ajustarse al nivel de riesgo, evidencia disponible, preferencias del paciente y metas medibles. En preguntas situacionales, descarta primero intervenciones que aumenten riesgo o no corresponden a la formulación clínica.',
+    'La intervención debe ajustarse a:
+- **nivel de riesgo**
+- **evidencia disponible**
+- **preferencias del paciente**
+- **metas observables**
+
+En preguntas situacionales, descarta primero opciones que:
+- aumentan el riesgo
+- no encajan con la formulación clínica
+- no corresponden al nivel de cuidado',
     'published'
   )
 on conflict (id) do update
@@ -38,16 +59,27 @@ values
     '50000000-0000-0000-0000-000000000001',
     '11111111-1111-1111-1111-111111111111',
     '30000000-0000-0000-0000-000000000001',
-    'Mnemotecnia para consentimiento: C.L.A.R.O.',
-    '**C**apacidad, **L**ímites, **A**lternativas, **R**iesgos/beneficios, **O**pción voluntaria. Úsala para recordar los componentes básicos del consentimiento informado.',
+    'C.L.A.R.O. para consentimiento informado',
+    '- **C**: Capacidad para consentir
+- **L**: Límites de la confidencialidad
+- **A**: Alternativas disponibles
+- **R**: Riesgos y beneficios
+- **O**: Opción voluntaria
+
+Repásala para verificar que el consentimiento sea **comprendido, informado y libre de coerción**.',
     'published'
   ),
   (
     '50000000-0000-0000-0000-000000000002',
     '11111111-1111-1111-1111-111111111111',
     '30000000-0000-0000-0000-000000000002',
-    'Mnemotecnia para evaluar riesgo: P.A.S.O.',
-    '**P**lan, **A**cceso a medios, **S**everidad actual, **O**rganización de apoyo. Resume factores inmediatos en evaluación de riesgo.',
+    'P.A.S.O. para evaluar riesgo',
+    '- **P**: Plan concreto
+- **A**: Acceso a medios
+- **S**: Severidad actual de la ideación o conducta
+- **O**: Organización de apoyo
+
+Si el **P.A.S.O.** está presente o aumenta, sube la urgencia de intervención y supervisión.',
     'published'
   )
 on conflict (id) do update
