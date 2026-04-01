@@ -145,7 +145,11 @@ export default function TopicDetailPage() {
               {detail.mnemonics.length ? (
                 <div className="space-y-4">
                   {detail.mnemonics.map((mnemonic) => (
-                    <div key={mnemonic.id} className="rounded-2xl bg-background p-4">
+                    <div
+                      key={mnemonic.id}
+                      id={`mnemonic-${mnemonic.id}`}
+                      className="rounded-2xl bg-background p-4 scroll-mt-28"
+                    >
                       <h3 className="font-semibold text-foreground mb-2">{mnemonic.title}</h3>
                       <MarkdownContent content={mnemonic.content_md} />
                     </div>
@@ -161,7 +165,11 @@ export default function TopicDetailPage() {
               {detail.cases.length ? (
                 <div className="space-y-4">
                   {detail.cases.map((caseItem) => (
-                    <div key={caseItem.id} className="rounded-2xl bg-background p-4">
+                    <div
+                      key={caseItem.id}
+                      id={`case-${caseItem.id}`}
+                      className="rounded-2xl bg-background p-4 scroll-mt-28"
+                    >
                       <h3 className="font-semibold text-foreground mb-2">{caseItem.title}</h3>
                       <MarkdownContent content={caseItem.body_md} />
                     </div>

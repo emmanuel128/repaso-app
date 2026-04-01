@@ -24,6 +24,10 @@ export type { Topic } from "./topics";
 export { fetchTopicBySlug, fetchTopicDetail } from "./topic-content";
 export type { TopicDetail, TopicNote, Mnemonic, CaseStudy, UserTopicProgress } from "./topic-content";
 
+// Search
+export { searchGlobalContent } from "./global-search";
+export type { GlobalSearchCategory, GlobalSearchGroup, GlobalSearchResult } from "./global-search";
+
 // Membership
 export { ACTIVE_MEMBERSHIP_STATUSES, fetchMemberships, fetchCurrentMembership, hasStudentAccess } from "./memberships";
 
