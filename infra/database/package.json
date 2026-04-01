@@ -12,6 +12,6 @@
     "deploy": "supabase db push --db-url \"$PROD_DB_URL\""
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.84.0"
+    "@supabase/supabase-js": "^2.101.1"
   }
 }
