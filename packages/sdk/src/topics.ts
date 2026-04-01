@@ -2,11 +2,15 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface Topic {
   id: string;
-  exam_id?: string | null;
+  tenant_id: string;
+  area_id: string;
   name: string;
   slug: string;
-  weight?: number | null;
+  description?: string | null;
+  order_index: number;
+  status: 'draft' | 'published' | 'archived';
   created_at?: string;
+  updated_at?: string;
 }
 
 export async function fetchTopics(client: SupabaseClient): Promise<Topic[]> {

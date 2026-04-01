@@ -6,13 +6,12 @@ import { createAuthClient } from '@/lib/supabase';
 
 export default function Home() {
   const router = useRouter();
-  const auth = createAuthClient();
 
   useEffect(() => {
     const checkAuth = async () => {
+      const auth = createAuthClient();
       const { session } = await auth.getSession();
 
-      // TODO: Redirect based on user role
       if (session) {
         router.push('/dashboard');
       } else {
@@ -20,7 +19,7 @@ export default function Home() {
       }
     };
     checkAuth();
-  }, [auth, router]);
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">

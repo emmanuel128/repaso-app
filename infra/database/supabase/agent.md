@@ -6,7 +6,7 @@ This directory contains the backend source of truth for Repaso.
 - Database: PostgreSQL on Supabase
 - Backend model: migrations, seeds, Row Level Security, and Edge Functions
 - Source of truth for schema: `migrations/`
-- Seed data: `seeds/seed.sql`
+- Seed data: `seeds/*.sql`
 - Edge Functions: `functions/`
 
 Current function directories:

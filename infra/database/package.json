@@ -8,7 +8,7 @@
     "migrate": "supabase migration up",
     "reset": "supabase db reset",
     "deploy-function": "supabase functions deploy",
-    "seed": "psql \"$PROD_DB_URL\" -f ./seeds/seed.sql",
+    "seed": "for file in ./seeds/*.sql; do psql \"$PROD_DB_URL\" -v ON_ERROR_STOP=1 -f \"$file\"; done",
     "deploy": "supabase db push --db-url \"$PROD_DB_URL\""
   },
   "dependencies": {

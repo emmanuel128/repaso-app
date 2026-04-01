@@ -27,7 +27,7 @@ export default async function RootLayout({
   const themeCookie = cookieStore.get('repaso:theme');
   const theme = themeCookie?.value === 'light' || themeCookie?.value === 'dark' ? themeCookie.value : undefined;
   return (
-    <html lang="en" {...(theme ? { 'data-theme': theme } : {})}>
+    <html lang="es" {...(theme ? { 'data-theme': theme } : {})}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

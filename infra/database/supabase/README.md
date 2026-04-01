@@ -10,7 +10,8 @@ supabase/
 ├── migrations/           # Migraciones SQL versionadas (estructura de la base de datos)
 │   └── <timestamp>_init.sql
 ├── seeds/                # Seeds SQL para poblar datos iniciales
-│   └── seed.sql
+│   ├── 00_tenant_bootstrap.sql
+│   └── ...
 ├── functions/            # Edge Functions (TypeScript/JS, serverless)
 ├── .branches/            # Estado local de migraciones (gitignore)
 └── .temp/                # Archivos temporales de Supabase CLI (gitignore)

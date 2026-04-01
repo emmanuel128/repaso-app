@@ -11,13 +11,12 @@ const options: { value: Theme; label: string }[] = [
 ];
 
 export default function ThemeSwitcher() {
-  const [theme, setTheme] = useState<Theme>('auto');
+  const [theme, setTheme] = useState<Theme>(() => initThemeFromStorage());
 
   useEffect(() => {
-    // initialize from storage and apply
-    const t = initThemeFromStorage();
-    setTheme(t);
-  }, []);
+    applyTheme(theme);
+    setThemeCookie(theme);
+  }, [theme]);
 
   const handleChange = (value: Theme) => {
     setTheme(value);

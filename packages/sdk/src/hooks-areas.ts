@@ -24,7 +24,7 @@ export function useAreasWithTopics(client: SupabaseClient) {
         if (!mounted) return;
         const topicsByArea: Record<string, Topic[]> = {};
         for (const t of topicsList) {
-          const key = (t as any).area_id as string; // schema includes area_id
+          const key = t.area_id;
           if (!topicsByArea[key]) topicsByArea[key] = [];
           topicsByArea[key].push(t);
         }

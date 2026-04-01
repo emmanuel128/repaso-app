@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createAuthClient } from '@/lib/supabase';
-import type { SignUpCredentials, AuthError } from '@repaso/sdk';
+import type { SignUpCredentials } from '@repaso/sdk';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 export default function SignUpPage() {
@@ -18,18 +18,18 @@ export default function SignUpPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const router = useRouter();
-    const auth = createAuthClient();
 
     useEffect(() => {
         // Check if user is already authenticated
         const checkAuth = async () => {
+            const auth = createAuthClient();
             const { session } = await auth.getSession();
             if (session) {
                 router.push('/dashboard');
             }
         };
         checkAuth();
-    }, [auth, router]);
+    }, [router]);
 
     const validateForm = (): string | null => {
         if (!credentials.firstName.trim()) {
@@ -73,6 +73,7 @@ export default function SignUpPage() {
         setLoading(true);
 
         try {
+            const auth = createAuthClient();
             const { user, error: authError } = await auth.signUp(credentials);
 
             if (authError) {
@@ -81,7 +82,7 @@ export default function SignUpPage() {
                 setSuccess(true);
                 // Note: User might need to verify email depending on Supabase settings
             }
-        } catch (err) {
+        } catch {
             setError('Error inesperado. Por favor, intenta de nuevo.');
         } finally {
             setLoading(false);
