@@ -16,6 +16,15 @@ export interface PracticeQuestion {
   options: PracticeQuestionOption[];
 }
 
+export interface UserQuestionFlag {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  question_id: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface PracticeSession {
   id: string;
   tenant_id: string;
@@ -92,6 +101,59 @@ export async function fetchTopicPracticeQuestions(
     ...question,
     options: [...question.options].sort((a, b) => a.order_index - b.order_index),
   }));
+}
+
+export async function fetchQuestionFlags(
+  client: SupabaseClient,
+  questionIds: string[]
+): Promise<string[]> {
+  if (!questionIds.length) {
+    return [];
+  }
+
+  const { data, error } = await client
+    .from("user_question_flags")
+    .select("question_id")
+    .in("question_id", questionIds);
+
+  if (error) throw error;
+  return (data ?? []).map((row) => row.question_id as string);
+}
+
+export async function setQuestionFlag(
+  client: SupabaseClient,
+  input: {
+    tenantId: string;
+    userId: string;
+    questionId: string;
+    flagged: boolean;
+  }
+): Promise<void> {
+  if (input.flagged) {
+    const { error } = await client.from("user_question_flags").upsert(
+      {
+        tenant_id: input.tenantId,
+        user_id: input.userId,
+        question_id: input.questionId,
+      },
+      {
+        onConflict: "tenant_id,user_id,question_id",
+        ignoreDuplicates: false,
+      }
+    );
+
+    if (error) throw error;
+    return;
+  }
+
+  const { error } = await client
+    .from("user_question_flags")
+    .delete()
+    .eq("tenant_id", input.tenantId)
+    .eq("user_id", input.userId)
+    .eq("question_id", input.questionId);
+
+  if (error) throw error;
 }
 
 export async function submitPracticeAttempt(

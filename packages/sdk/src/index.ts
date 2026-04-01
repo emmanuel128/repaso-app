@@ -31,13 +31,16 @@ export { ACTIVE_MEMBERSHIP_STATUSES, fetchMemberships, fetchCurrentMembership, h
 export {
     createPracticeSession,
     fetchTopicPracticeQuestions,
+    fetchQuestionFlags,
     submitPracticeAttempt,
     fetchAttemptReview,
+    setQuestionFlag,
 } from "./practice";
 export type {
     PracticeSession,
     PracticeQuestion,
     PracticeQuestionOption,
+    UserQuestionFlag,
     SelectedAnswer,
     PracticeSubmissionSummary,
     AttemptReviewQuestion,

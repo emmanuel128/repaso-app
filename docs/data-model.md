@@ -12,7 +12,7 @@ This document describes the current PostgreSQL data model used by Repaso in Supa
 At the time of writing, the schema defines:
 
 - 5 enum types
-- 20 application tables in `public`
+- 21 application tables in `public`
 - Row Level Security on every application table
 
 ## Design Principles
@@ -176,6 +176,7 @@ Used by:
 - `auth.users` has many `attempts`
 - `attempts` has many `attempt_answers`
 - `attempt_answers` has many `attempt_answer_options`
+- `auth.users` has many `user_question_flags`
 - `auth.users` has many `user_topic_progress`
 - `auth.users` has many `study_notes`
 
@@ -765,6 +766,33 @@ Behavior:
 - notes default to private
 - topic and question references are optional and independently nullable
 
+### `user_question_flags`
+Purpose: persisted student bookmarks for questions that need follow-up review.
+
+Columns:
+
+- `id uuid primary key default gen_random_uuid()`
+- `tenant_id uuid not null references tenants(id) on delete cascade`
+- `user_id uuid not null references auth.users(id) on delete cascade`
+- `question_id uuid not null references questions(id) on delete cascade`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+Constraints:
+
+- unique `(tenant_id, user_id, question_id)`
+
+Indexes:
+
+- `idx_user_question_flags_user (tenant_id, user_id, created_at desc)`
+- `idx_user_question_flags_question (question_id)`
+
+Behavior:
+
+- each user can flag a given question once per tenant
+- flags are durable across practice runs because they are keyed to the user and question instead of a single attempt
+- the `updated_at` trigger supports idempotent upserts from the application layer
+
 ### `audit_log`
 Purpose: append-oriented audit trail for tenant activity.
 
@@ -794,7 +822,7 @@ Behavior:
 The following patterns use `on delete cascade`:
 
 - deleting a tenant removes most tenant-owned records
-- deleting a user removes `profiles`, `user_tenants`, `memberships`, `practice_sessions`, `attempts`, `user_topic_progress`, and `study_notes`
+- deleting a user removes `profiles`, `user_tenants`, `memberships`, `practice_sessions`, `attempts`, `user_question_flags`, `user_topic_progress`, and `study_notes`
 - deleting a question removes `question_options`, `question_media`, `question_tags`, and dependent attempt answers
 - deleting a quiz removes `quiz_questions`
 - deleting an attempt removes `attempt_answers`, which then remove `attempt_answer_options`
@@ -830,6 +858,7 @@ All documented tables have RLS enabled.
 - `user_tenants`: users can view their own links; admins can manage tenant links
 - `memberships`: users can view their own memberships; admins can manage tenant memberships
 - `study_notes`: users can read/write only their own notes in the active tenant
+- `user_question_flags`: users can read/write only their own question bookmarks in the active tenant
 - `practice_sessions`: users can read/write only their own sessions in the active tenant
 - `attempts`: users can read/write only their own attempts in the active tenant
 - `attempt_answers`: users can read/write only answers that belong to their own attempts
