@@ -6,6 +6,6 @@
     "types": "src/index.ts",
     "dependencies": {
         "@repaso/db": "0.1.0",
-        "@supabase/supabase-js": "^2.81.1"
+        "@supabase/supabase-js": "^2.101.1"
     }
 }
