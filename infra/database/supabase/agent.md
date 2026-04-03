@@ -50,6 +50,7 @@ Deployment-oriented scripts defined in `infra/database/package.json`:
 - Access control depends on JWT claims plus RLS policies
 - `auth.users` is the identity source; app-level user data is modeled in `public`
 - The custom auth token hook and `user_tenants` relationship are central to tenant/role resolution
+- Frontend access state is now resolved through shared application and infrastructure packages, but those layers must continue to defer to these JWT and RLS rules
 
 Before changing access behavior:
 

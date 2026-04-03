@@ -53,10 +53,11 @@ repaso-app/
 │       ├── .gitkeep
 │       └── agent.md
 │
-├── packages/                      # 🧩 Código compartido
-│   ├── db/
-│   ├── sdk/
-│   └── ui/
+├── packages/                      # 🧩 Código compartido por capas
+│   ├── domain/                    # Entidades, tipos, enums y reglas puras
+│   ├── application/               # Casos de uso y contratos de repositorio
+│   ├── infrastructure/            # Implementaciones Supabase, auth y queries
+│   └── hooks/                     # Adaptadores React para web/mobile
 │
 ├── .github/
 │   └── instructions/
@@ -77,7 +78,7 @@ graph TD
   C[Mobile App -Expo-] -->|Auth + Data| B
   B --> D[Storage / Edge Functions]
   B --> E[PostgreSQL DB]
-  A --> F[UI Shared Components]
+  A --> F[Hooks y casos de uso]
   C --> F
 ```
 ## ⚙️ Configuración e Instalación
@@ -130,6 +131,13 @@ npm run db:stop
 - 👥 **Roles de usuario** (estudiante, instructor, admin)  
 - 💳 **Membresías y pagos** (Stripe/PayPal-ready)  
 - 🌐 **Modo whitelabel:** configurable por examen y marca  
+
+## 🏗️ Arquitectura Actual
+
+- `packages/domain`: entidades de negocio, DTOs, enums de rol/membresía y helpers puros
+- `packages/application`: casos de uso como acceso actual, dashboard, temas, búsqueda y práctica
+- `packages/infrastructure`: cliente Supabase, auth adapter y repositorios concretos
+- `packages/hooks`: hooks React genéricos y hooks del rol estudiante
 
 ---
 

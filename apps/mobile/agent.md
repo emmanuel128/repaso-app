@@ -5,7 +5,7 @@ This directory is reserved for the Repaso mobile application.
 
 - Target platforms: iOS and Android
 - Planned framework: Expo with React Native
-- Expected sharing model: hooks and reusable logic from `packages/*`
+- Expected sharing model: `packages/domain`, `packages/application`, and `packages/hooks`
 - Current status: scaffold placeholder only
 
 Right now this directory contains no mobile implementation beyond `.gitkeep`.
@@ -29,6 +29,7 @@ Before adding code here:
 - Keep mobile-specific UI in this app, but push reusable domain logic into `packages/*`
 - Reuse the same Supabase backend and schema as the web app
 - Keep the whitelabel architecture intact
+- When role-specific mobile surfaces arrive, mirror the web split between shared code and role-oriented app shells
 
 ## Implementation Expectations
 
@@ -42,4 +43,5 @@ Before adding code here:
 - add the minimal Expo scaffold first
 - define clear app entrypoints and environment handling
 - wire auth and data access through shared abstractions instead of duplicating the web client setup blindly
+- prefer consuming `packages/hooks` and `packages/application` rather than importing Supabase queries directly into screens
 - document any new commands here once the project exists

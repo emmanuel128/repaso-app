@@ -6,6 +6,7 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
 - Monorepo con tres dominios principales: `apps/web` (Next.js), `apps/mobile` (placeholder para Expo/React Native) e `infra/database/supabase` (migraciones SQL, funciones edge y seeds).
 - Backend "serverless" apoyado en Supabase (Auth, Postgres, Storage, Edge Functions); evita construir un backend Express a menos que sea imprescindible.
 - Diseño whitelabel: el núcleo de lógica debe ser parametrizable por tenant/examen. Mantén configuraciones separables.
+- La lógica compartida sigue una arquitectura por capas: `packages/domain`, `packages/application`, `packages/infrastructure` y `packages/hooks`.
 
 ## 📁 Patrones de Organización
 - Features se agrupan por dominio. Reutiliza lógica transversal en `packages/*`.
@@ -43,9 +44,10 @@ repaso-app/
 │       └── agent.md
 │
 ├── packages/
-│   ├── db/
-│   ├── sdk/
-│   └── ui/
+│   ├── domain/
+│   ├── application/
+│   ├── infrastructure/
+│   └── hooks/
 │
 ├── .github/
 │   └── instructions/
@@ -132,6 +134,21 @@ Tipos: feat | fix | chore | docs | test | refactor
 - La app web usa App Router; mantén la estructura en `apps/web/src/app`.
 - React Query / SWR no forman parte del stack actual; no los introduzcas por defecto sin una necesidad clara.
 - Manejo de estado global mínimo; preferir hooks por feature.
+- No coloques queries Supabase directamente en páginas o componentes. Usa `application` + `infrastructure` + `hooks`.
+- Evita checks de acceso por página si el shell autenticado compartido puede resolverlos una sola vez.
+
+## 🧱 Capas Compartidas
+- `packages/domain`: entidades, DTOs, enums, reglas puras y predicados de acceso.
+- `packages/application`: casos de uso y contratos de repositorios/servicios.
+- `packages/infrastructure`: cliente Supabase, auth adapters y repositorios concretos.
+- `packages/hooks`: hooks React que adaptan la capa de aplicación a web y móvil.
+
+Regla de dependencias:
+- `domain` no depende de otras capas compartidas.
+- `application` depende de `domain`.
+- `infrastructure` depende de `domain` y satisface contratos usados por `application`.
+- `hooks` depende de `application` y `domain`.
+- `apps/*` consumen hooks y casos de uso; solo deben tocar `infrastructure` para composición/wiring.
 
 ## 🗃 Datos y Migraciones
 - Cada nueva feature que requiere datos: agregar migración SQL en `infra/database/supabase/migrations/` con nombre timestamp + descripción.
@@ -163,16 +180,19 @@ Incluye cambios destructivos solo cuando sean realmente necesarios y explícitos
 ## 🧩 Ejemplos de Tareas para IA
 ```text
 "Crear migración para tabla 'topics' con campos id, exam_id, nombre, slug, weight"
-"Agregar componente React 'ProgressChart' reutilizando Tailwind y datos de progreso"
-"Generar hook useUserRole() que lea sesión Supabase y exponga booleans isAdmin/isInstructor/isStudent"
+"Agregar caso de uso en packages/application para cargar el dashboard del estudiante"
+"Generar hook genérico de acceso/rol que exponga isAdmin/isInstructor/isStudent y hasActiveMembership"
+"Mover una query Supabase desde una página de Next.js a packages/infrastructure y conectarla desde hooks"
 ```
 
 ## ⚠️ Pitfalls a Evitar
-- Duplicar lógica de acceso a Supabase en múltiples componentes (extrae util compartido).
+- Duplicar lógica de acceso a Supabase en múltiples componentes o páginas.
 - Mezclar claves service role en cliente web/mobile: solo en funciones seguras (Edge/Server).
 - Hardcode de textos que deberían ser configurables por examen.
 - Tratar `apps/mobile` como si ya estuviera implementado.
 - Contradecir el esquema SQL o la documentación de `docs/data-model.md`.
+- Saltarse la separación por capas y volver a introducir un paquete “sdk” monolítico.
+- Colocar lógica de negocio dentro de hooks cuando debería vivir en `application`.
 
 ## ✅ Principios
 - Parametrización > hardcode.

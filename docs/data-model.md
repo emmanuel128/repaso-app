@@ -71,6 +71,11 @@ Constraint to keep in mind:
 - the hook currently selects one row from `user_tenants` for a user without explicit ordering or tenant selection logic
 - if a user belongs to multiple tenants, the token will reflect whichever row is returned by the query
 
+Application note:
+
+- the web app now resolves current access through shared `domain/application/infrastructure/hooks` layers and a generic authenticated student shell
+- role-aware UI routing should continue to treat the JWT and RLS model here as the backend source of truth
+
 ## Enum Types
 
 ### `role_type`

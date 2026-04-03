@@ -1,0 +1,10 @@
+{
+  "name": "@repaso/domain",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1"
+  }
+}
