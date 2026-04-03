@@ -44,9 +44,9 @@ repaso-app/
 │   │   ├── package.json
 │   │   ├── agent.md
 │   │   └── src/
-│   │       ├── app/
+│   │       ├── app/               # Route groups: (student), (owner), (admin), (instructor)
 │   │       ├── components/
-│   │       ├── lib/
+│   │       ├── lib/               # Supabase + dependency boundary for web
 │   │       └── proxy.ts
 │   │
 │   └── mobile/                    # Placeholder para futura app Expo
@@ -57,7 +57,7 @@ repaso-app/
 │   ├── domain/                    # Entidades, tipos, enums y reglas puras
 │   ├── application/               # Casos de uso y contratos de repositorio
 │   ├── infrastructure/            # Implementaciones Supabase, auth y queries
-│   └── hooks/                     # Adaptadores React para web/mobile
+│   └── hooks/                     # Hooks React reutilizables para web y futura app móvil
 │
 ├── .github/
 │   └── instructions/
@@ -123,12 +123,12 @@ npm run db:stop
 
 ---
 
-## 🧱 Funcionalidades Clave (Visión)
+## 🧱 Funcionalidades Clave (Estado Actual y Visión)
 
 - 🧠 **Preguntas de práctica** tipo examen con resultados instantáneos  
 - 📈 **Seguimiento de progreso por tema y por intento**  
 - 🎓 **Casos clínicos, notas y mnemotecnias**  
-- 👥 **Roles de usuario** (estudiante, instructor, admin)  
+- 👥 **Roles de usuario**: estudiante activo hoy; owner, admin e instructor con estructura web base y placeholders  
 - 💳 **Membresías y pagos** (Stripe/PayPal-ready)  
 - 🌐 **Modo whitelabel:** configurable por examen y marca  
 
@@ -138,6 +138,24 @@ npm run db:stop
 - `packages/application`: casos de uso como acceso actual, dashboard, temas, búsqueda y práctica
 - `packages/infrastructure`: cliente Supabase, auth adapter y repositorios concretos
 - `packages/hooks`: hooks React genéricos y hooks del rol estudiante
+- `apps/web/src/lib/repaso-dependencies.ts`: boundary de composición para que la web use repositorios y dependencias sin importar `@repaso/infrastructure` desde rutas/componentes
+
+## 🌐 Web App Hoy
+
+- Rutas de estudiante preservadas:
+  - `/dashboard`
+  - `/topics`
+  - `/topics/[slug]`
+  - `/topics/[slug]/practice`
+  - `/topics/[slug]/practice/summary`
+  - `/search`
+  - `/attempts/[attemptId]`
+- Rutas placeholder para otros roles:
+  - `/owner`
+  - `/admin`
+  - `/instructor`
+- La web usa Route Groups internos para separar `(student)`, `(owner)`, `(admin)` y `(instructor)` sin romper las URLs actuales del estudiante
+- `/dashboard` funciona como role-based dashboard switcher
 
 ---
 
@@ -176,4 +194,5 @@ Convenciones:
 - No exponer `SERVICE_ROLE_KEY` en cliente (web/mobile).
 - La autorización depende de Supabase Auth, JWT claims y RLS en las tablas de aplicación.
 - Reutilizar lógica en paquetes compartidos para evitar duplicación.
+- Mantener la composición web de infraestructura encapsulada en `apps/web/src/lib`.
 - Todo contenido para la Revalida en español y terminología consistente.

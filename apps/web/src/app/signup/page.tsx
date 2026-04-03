@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createAuthClient } from '@/lib/supabase';
-import type { SignUpCredentials } from '@repaso/sdk';
+import type { SignUpCredentials } from '@repaso/domain';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 export default function SignUpPage() {

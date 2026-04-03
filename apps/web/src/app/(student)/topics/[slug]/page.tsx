@@ -1,62 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { fetchTopicDetail, type TopicDetail } from "@repaso/sdk";
+import { useResolvedCurrentAccess, useStudentTopicDetail } from "@repaso/hooks";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import MarkdownContent from "@/components/MarkdownContent";
 import PageLoader from "@/components/PageLoader";
-import { supabaseBrowser } from "@/lib/supabase";
-import { useStudentAccess } from "@/lib/student-access";
+import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 export default function TopicDetailPage() {
-  const { loading: accessLoading, allowed, error: accessError } = useStudentAccess();
   const params = useParams<{ slug: string }>();
   const slug = typeof params.slug === "string" ? params.slug : null;
-  const [detail, setDetail] = useState<TopicDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (accessLoading || !allowed || !slug) {
-      return;
-    }
-
-    const currentSlug = slug;
-    const client = supabaseBrowser();
-    let mounted = true;
-
-    async function loadDetail() {
-      setLoading(true);
-      try {
-        const data = await fetchTopicDetail(client, currentSlug);
-        if (!mounted) {
-          return;
-        }
-
-        setDetail(data);
-        setError(data ? null : "No encontramos ese tema.");
-      } catch (loadError) {
-        if (!mounted) {
-          return;
-        }
-
-        setError(loadError instanceof Error ? loadError.message : "No fue posible cargar el tema.");
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadDetail();
-
-    return () => {
-      mounted = false;
-    };
-  }, [accessLoading, allowed, slug]);
+  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const accessLoading = access.loading;
+  const allowed = access.isStudent && access.hasActiveMembership;
+  const accessError = allowed
+    ? null
+    : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
+  const { detail, loading, error } = useStudentTopicDetail(browserStudentRepository, allowed ? slug : null);
 
   if (!allowed) {
     if (accessLoading || !slug) {

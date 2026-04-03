@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { updateStudentQuestionFlag } from "@repaso/application";
+import { useResolvedCurrentAccess, useStudentPracticeContent } from "@repaso/hooks";
 import { useParams, useRouter } from "next/navigation";
-import type { PracticeQuestion, TopicDetail } from "@repaso/sdk";
-import { fetchQuestionFlags, fetchTopicDetail, fetchTopicPracticeQuestions, setQuestionFlag } from "@repaso/sdk";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import FlagToggleButton from "@/components/FlagToggleButton";
 import PageLoader from "@/components/PageLoader";
 import { loadPracticeDraft, sanitizePracticeDraft, savePracticeDraft } from "@/lib/practice-draft";
-import { supabaseBrowser } from "@/lib/supabase";
-import { useStudentAccess } from "@/lib/student-access";
+import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 type AnswerMap = Record<string, string>;
 
@@ -19,71 +18,39 @@ const QUESTION_LIMIT = 5;
 export default function PracticePage() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
-  const { loading: accessLoading, user, membership, allowed, error: accessError } = useStudentAccess();
   const slug = typeof params.slug === "string" ? params.slug : null;
-  const [detail, setDetail] = useState<TopicDetail | null>(null);
-  const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
+  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const accessLoading = access.loading;
+  const user = access.user;
+  const membership = access.membership;
+  const allowed = access.isStudent && access.hasActiveMembership;
+  const accessError = allowed
+    ? null
+    : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
+  const { content, loading, error: contentError } = useStudentPracticeContent(
+    browserStudentRepository,
+    allowed ? slug : null,
+    QUESTION_LIMIT
+  );
+  const detail = content?.detail ?? null;
+  const questions = content?.questions ?? [];
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<string[]>([]);
   const [pendingFlagIds, setPendingFlagIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (accessLoading || !allowed || !slug || !user) {
+    if (!content || !user || !slug) {
       return;
     }
 
-    const currentSlug = slug;
-    const currentUser = user;
-    const client = supabaseBrowser();
-    let mounted = true;
+    const draft = loadPracticeDraft(user.id, slug);
+    const sanitizedDraft = sanitizePracticeDraft(draft, questions);
 
-    async function loadPractice() {
-      setLoading(true);
-      try {
-        const topicDetail = await fetchTopicDetail(client, currentSlug);
-
-        if (!topicDetail) {
-          throw new Error("No encontramos el tema solicitado.");
-        }
-
-        const practiceQuestions = await fetchTopicPracticeQuestions(client, topicDetail.topic.id, QUESTION_LIMIT);
-        const flagIds = await fetchQuestionFlags(
-          client,
-          practiceQuestions.map((question) => question.question_id)
-        );
-        const draft = loadPracticeDraft(currentUser.id, currentSlug);
-        const sanitizedDraft = sanitizePracticeDraft(draft, practiceQuestions);
-
-        if (!mounted) {
-          return;
-        }
-
-        setDetail(topicDetail);
-        setQuestions(practiceQuestions);
-        setAnswers(sanitizedDraft.answers);
-        setFlaggedQuestionIds(flagIds);
-        setError(null);
-      } catch (loadError) {
-        if (!mounted) {
-          return;
-        }
-
-        setError(loadError instanceof Error ? loadError.message : "No fue posible cargar la práctica.");
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadPractice();
-
-    return () => {
-      mounted = false;
-    };
-  }, [accessLoading, allowed, slug, user]);
+    setAnswers(sanitizedDraft.answers);
+    setFlaggedQuestionIds(content.flaggedQuestionIds);
+    setError(null);
+  }, [content, questions, slug, user]);
 
   useEffect(() => {
     if (!detail || !user || !slug || questions.length === 0) {
@@ -129,8 +96,7 @@ export default function PracticePage() {
     setError(null);
 
     try {
-      const client = supabaseBrowser();
-      await setQuestionFlag(client, {
+      await updateStudentQuestionFlag(browserStudentRepository, {
         tenantId: membership.tenant_id,
         userId: user.id,
         questionId,
@@ -171,8 +137,8 @@ export default function PracticePage() {
     return <PageLoader label="Preparando práctica..." />;
   }
 
-  if (error && !detail) {
-    return <AccessNotice title="Práctica no disponible" message={error} />;
+  if ((error || contentError) && !detail) {
+    return <AccessNotice title="Práctica no disponible" message={error ?? contentError ?? "No fue posible cargar la práctica."} />;
   }
 
   return (
@@ -248,9 +214,9 @@ export default function PracticePage() {
                         key={option.id}
                         type="button"
                         onClick={() => handleSelect(question.question_id, option.id)}
-                        className={`w-full text-left rounded-2xl border px-4 py-4 transition-colors ${
+                        className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
                           selected
-                            ? "border-primary bg-primary/10 text-foreground"
+                            ? "border-primary bg-primary/10"
                             : "border-foreground/10 hover:border-primary/40 hover:bg-background"
                         }`}
                       >
@@ -262,18 +228,19 @@ export default function PracticePage() {
                 </div>
               </article>
             ))}
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={handleReviewSummary}
-                className="inline-flex items-center justify-center rounded-full bg-primary hover:bg-secondary text-white px-6 py-3 font-medium transition-colors"
-              >
-                Revisar resumen
-              </button>
-            </div>
           </section>
         )}
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleReviewSummary}
+            disabled={questions.length === 0}
+            className="inline-flex items-center justify-center rounded-full bg-primary hover:bg-secondary disabled:opacity-60 disabled:cursor-not-allowed text-white px-6 py-3 font-medium transition-colors"
+          >
+            Revisar resumen
+          </button>
+        </div>
       </main>
     </div>
   );

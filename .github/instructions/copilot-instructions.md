@@ -7,6 +7,7 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
 - Backend "serverless" apoyado en Supabase (Auth, Postgres, Storage, Edge Functions); evita construir un backend Express a menos que sea imprescindible.
 - Diseño whitelabel: el núcleo de lógica debe ser parametrizable por tenant/examen. Mantén configuraciones separables.
 - La lógica compartida sigue una arquitectura por capas: `packages/domain`, `packages/application`, `packages/infrastructure` y `packages/hooks`.
+- La app web actual usa route groups internos para `(student)`, `(owner)`, `(admin)` e `(instructor)` y un `dashboard` con role switcher.
 
 ## 📁 Patrones de Organización
 - Features se agrupan por dominio. Reutiliza lógica transversal en `packages/*`.
@@ -34,9 +35,9 @@ repaso-app/
 │   │   ├── next.config.ts
 │   │   ├── package.json
 │   │   └── src/
-│   │       ├── app/
+│   │       ├── app/               # route groups y páginas
 │   │       ├── components/
-│   │       ├── lib/
+│   │       ├── lib/               # supabase + dependency boundary web
 │   │       └── proxy.ts
 │   │
 │   └── mobile/                    # Aún sin scaffold real
@@ -132,9 +133,11 @@ Tipos: feat | fix | chore | docs | test | refactor
 - TypeScript estricto.
 - Estilos web: Tailwind CSS v4. Usa las variables CSS definidas en `apps/web/src/app/globals.css` (`--primary`, `--secondary`, `--accent`, etc.) en lugar de hardcodear colores.
 - La app web usa App Router; mantén la estructura en `apps/web/src/app`.
+- Respeta la estructura actual de route groups en `apps/web/src/app`.
 - React Query / SWR no forman parte del stack actual; no los introduzcas por defecto sin una necesidad clara.
 - Manejo de estado global mínimo; preferir hooks por feature.
 - No coloques queries Supabase directamente en páginas o componentes. Usa `application` + `infrastructure` + `hooks`.
+- No importes `@repaso/infrastructure` directamente desde páginas o componentes web. Usa `apps/web/src/lib/repaso-dependencies.ts` como boundary de composición para web.
 - Evita checks de acceso por página si el shell autenticado compartido puede resolverlos una sola vez.
 
 ## 🧱 Capas Compartidas
@@ -148,7 +151,8 @@ Regla de dependencias:
 - `application` depende de `domain`.
 - `infrastructure` depende de `domain` y satisface contratos usados por `application`.
 - `hooks` depende de `application` y `domain`.
-- `apps/*` consumen hooks y casos de uso; solo deben tocar `infrastructure` para composición/wiring.
+- `apps/*` consumen hooks y casos de uso.
+- En web, la composición/wiring hacia `infrastructure` debe quedar encapsulada en `apps/web/src/lib` y no filtrarse a rutas o componentes.
 
 ## 🗃 Datos y Migraciones
 - Cada nueva feature que requiere datos: agregar migración SQL en `infra/database/supabase/migrations/` con nombre timestamp + descripción.
@@ -192,6 +196,7 @@ Incluye cambios destructivos solo cuando sean realmente necesarios y explícitos
 - Tratar `apps/mobile` como si ya estuviera implementado.
 - Contradecir el esquema SQL o la documentación de `docs/data-model.md`.
 - Saltarse la separación por capas y volver a introducir un paquete “sdk” monolítico.
+- Saltarse el boundary de `apps/web/src/lib/repaso-dependencies.ts` e importar infraestructura directo desde UI web.
 - Colocar lógica de negocio dentro de hooks cuando debería vivir en `application`.
 
 ## ✅ Principios

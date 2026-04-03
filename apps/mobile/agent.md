@@ -30,6 +30,7 @@ Before adding code here:
 - Reuse the same Supabase backend and schema as the web app
 - Keep the whitelabel architecture intact
 - When role-specific mobile surfaces arrive, mirror the web split between shared code and role-oriented app shells
+- Mirror the web dependency strategy: keep mobile-specific assembly in the mobile app layer, and consume `packages/domain`, `packages/application`, and `packages/hooks` directly rather than importing web-only utilities
 
 ## Implementation Expectations
 

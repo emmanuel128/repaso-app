@@ -2,24 +2,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { searchGlobalContent, useAreasWithTopics } from "@repaso/sdk";
-import type { GlobalSearchGroup } from "@repaso/sdk";
+import { useResolvedCurrentAccess, useStudentAreasWithTopics, useStudentGlobalSearch } from "@repaso/hooks";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
-import { supabaseBrowser } from "@/lib/supabase";
-import { useStudentAccess } from "@/lib/student-access";
+import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 const MIN_QUERY_LENGTH = 2;
 
 export default function TopicsPage() {
-  const { loading: accessLoading, allowed, error: accessError } = useStudentAccess();
-  const { areas, loading, error } = useAreasWithTopics(supabaseBrowser());
+  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const accessLoading = access.loading;
+  const allowed = access.isStudent && access.hasActiveMembership;
+  const accessError = allowed
+    ? null
+    : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
+  const { areas, loading, error } = useStudentAreasWithTopics(browserStudentRepository);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<GlobalSearchGroup[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -31,56 +31,17 @@ export default function TopicsPage() {
     };
   }, [query]);
 
-  useEffect(() => {
-    if (accessLoading || !allowed) {
-      return;
-    }
-
-    const trimmedQuery = debouncedQuery.trim();
-
-    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
-      setSearchResults([]);
-      setSearchLoading(false);
-      setSearchError(null);
-      return;
-    }
-
-    const client = supabaseBrowser();
-    let mounted = true;
-
-    async function runSearch() {
-      setSearchLoading(true);
-      try {
-        const data = await searchGlobalContent(client, trimmedQuery);
-
-        if (!mounted) {
-          return;
-        }
-
-        setSearchResults(data);
-        setSearchError(null);
-      } catch (loadError) {
-        if (!mounted) {
-          return;
-        }
-
-        setSearchError(loadError instanceof Error ? loadError.message : "No fue posible completar la búsqueda.");
-      } finally {
-        if (mounted) {
-          setSearchLoading(false);
-        }
-      }
-    }
-
-    runSearch();
-
-    return () => {
-      mounted = false;
-    };
-  }, [accessLoading, allowed, debouncedQuery]);
-
   const trimmedQuery = query.trim();
   const hasActiveSearch = trimmedQuery.length >= MIN_QUERY_LENGTH;
+  const {
+    results: searchResults,
+    loading: searchLoading,
+    error: searchError,
+  } = useStudentGlobalSearch(
+    browserStudentRepository,
+    debouncedQuery,
+    allowed && !accessLoading && hasActiveSearch
+  );
   const totalResults = useMemo(
     () => searchResults.reduce((sum, group) => sum + group.results.length, 0),
     [searchResults]

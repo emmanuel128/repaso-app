@@ -1,63 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import type { AttemptReviewQuestion } from "@repaso/sdk";
-import { fetchAttemptReview } from "@repaso/sdk";
+import { useResolvedCurrentAccess, useStudentAttemptReview } from "@repaso/hooks";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
-import { supabaseBrowser } from "@/lib/supabase";
-import { useStudentAccess } from "@/lib/student-access";
+import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 export default function AttemptReviewPage() {
-  const { loading: accessLoading, allowed, error: accessError } = useStudentAccess();
   const params = useParams<{ attemptId: string }>();
   const attemptId = typeof params.attemptId === "string" ? params.attemptId : null;
-  const [review, setReview] = useState<AttemptReviewQuestion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (accessLoading || !allowed || !attemptId) {
-      return;
-    }
-
-    const currentAttemptId = attemptId;
-    const client = supabaseBrowser();
-    let mounted = true;
-
-    async function loadReview() {
-      setLoading(true);
-      try {
-        const data = await fetchAttemptReview(client, currentAttemptId);
-
-        if (!mounted) {
-          return;
-        }
-
-        setReview(data);
-        setError(data.length ? null : "No encontramos respuestas para este intento.");
-      } catch (loadError) {
-        if (!mounted) {
-          return;
-        }
-
-        setError(loadError instanceof Error ? loadError.message : "No fue posible cargar la revisión.");
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadReview();
-
-    return () => {
-      mounted = false;
-    };
-  }, [accessLoading, allowed, attemptId]);
+  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const accessLoading = access.loading;
+  const allowed = access.isStudent && access.hasActiveMembership;
+  const accessError = allowed
+    ? null
+    : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
+  const { review, loading, error } = useStudentAttemptReview(browserStudentRepository, allowed ? attemptId : null);
 
   const score = useMemo(() => review.reduce((sum, item) => sum + item.score, 0), [review]);
   const maxScore = review.length;

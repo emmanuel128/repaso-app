@@ -1,6 +1,6 @@
 "use client";
 
-import type { PracticeQuestion } from "@repaso/sdk";
+import type { PracticeQuestion } from "@repaso/domain";
 
 export interface PracticeDraft {
   topicId: string;

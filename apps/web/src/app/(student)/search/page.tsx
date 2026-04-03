@@ -3,13 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { GlobalSearchGroup } from "@repaso/sdk";
-import { searchGlobalContent } from "@repaso/sdk";
+import { useResolvedCurrentAccess, useStudentGlobalSearch } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import AppHeader from "@/components/AppHeader";
 import PageLoader from "@/components/PageLoader";
-import { supabaseBrowser } from "@/lib/supabase";
-import { useStudentAccess } from "@/lib/student-access";
+import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 const MIN_QUERY_LENGTH = 2;
 
@@ -17,63 +15,28 @@ export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
-  const { loading: accessLoading, allowed, error: accessError } = useStudentAccess();
+  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const accessLoading = access.loading;
+  const allowed = access.isStudent && access.hasActiveMembership;
+  const accessError = allowed
+    ? null
+    : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
   const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState<GlobalSearchGroup[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
 
-  useEffect(() => {
-    if (accessLoading || !allowed) {
-      return;
-    }
-
-    const trimmedQuery = initialQuery.trim();
-
-    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
-      setResults([]);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    const client = supabaseBrowser();
-    let mounted = true;
-
-    async function runSearch() {
-      setLoading(true);
-      try {
-        const data = await searchGlobalContent(client, trimmedQuery);
-
-        if (!mounted) {
-          return;
-        }
-
-        setResults(data);
-        setError(null);
-      } catch (searchError) {
-        if (!mounted) {
-          return;
-        }
-
-        setError(searchError instanceof Error ? searchError.message : "No fue posible completar la búsqueda.");
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    runSearch();
-
-    return () => {
-      mounted = false;
-    };
-  }, [accessLoading, allowed, initialQuery]);
+  const trimmedQuery = initialQuery.trim();
+  const {
+    results,
+    loading,
+    error,
+  } = useStudentGlobalSearch(
+    browserStudentRepository,
+    trimmedQuery,
+    allowed && !accessLoading && trimmedQuery.length >= MIN_QUERY_LENGTH
+  );
 
   const totalResults = useMemo(
     () => results.reduce((sum, group) => sum + group.results.length, 0),
@@ -136,7 +99,7 @@ export default function SearchPage() {
 
         {error ? <div className="bg-error/10 border border-error rounded-2xl p-4 text-error">{error}</div> : null}
 
-        {initialQuery.trim().length < MIN_QUERY_LENGTH ? (
+        {trimmedQuery.length < MIN_QUERY_LENGTH ? (
           <section className="bg-white rounded-2xl border border-foreground/10 p-6 text-text-secondary">
             Escribe al menos {MIN_QUERY_LENGTH} caracteres para buscar en todo el contenido publicado.
           </section>
@@ -144,12 +107,12 @@ export default function SearchPage() {
 
         {loading ? <PageLoader label="Buscando contenido..." /> : null}
 
-        {!loading && initialQuery.trim().length >= MIN_QUERY_LENGTH ? (
+        {!loading && trimmedQuery.length >= MIN_QUERY_LENGTH ? (
           <section className="space-y-6">
             <div className="bg-white rounded-2xl border border-foreground/10 p-5">
               <p className="text-sm uppercase tracking-[0.2em] text-text-secondary mb-2">Resultados</p>
               <h2 className="text-2xl font-semibold text-foreground">
-                {totalResults} coincidencia{totalResults === 1 ? "" : "s"} para “{initialQuery.trim()}”
+                {totalResults} coincidencia{totalResults === 1 ? "" : "s"} para “{trimmedQuery}”
               </h2>
             </div>
 

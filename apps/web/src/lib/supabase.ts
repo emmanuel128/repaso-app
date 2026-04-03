@@ -1,16 +1,16 @@
-import { makeClient, RepasoAuth } from "@repaso/sdk";
+import { createRepasoAuth, makeSupabaseClient } from "@repaso/infrastructure";
 
 export const supabaseServer = () =>
-    makeClient(
+    makeSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     );
 
-let browserClient: ReturnType<typeof makeClient> | null = null;
+let browserClient: ReturnType<typeof makeSupabaseClient> | null = null;
 
 export const supabaseBrowser = () => {
     if (!browserClient) {
-        browserClient = makeClient(
+        browserClient = makeSupabaseClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
@@ -22,5 +22,5 @@ export const supabaseBrowser = () => {
 // Create auth instance for browser
 export const createAuthClient = () => {
     const client = supabaseBrowser();
-    return new RepasoAuth(client);
+    return createRepasoAuth(client);
 };

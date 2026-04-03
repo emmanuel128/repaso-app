@@ -1,22 +1,29 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { startStudentPracticeSession, submitStudentPracticeAttempt } from "@repaso/application";
+import type { SelectedAnswer } from "@repaso/domain";
+import { useResolvedCurrentAccess } from "@repaso/hooks";
 import { useParams, useRouter } from "next/navigation";
 import type { PracticeDraft } from "@/lib/practice-draft";
-import type { SelectedAnswer } from "@repaso/sdk";
-import { createPracticeSession, submitPracticeAttempt } from "@repaso/sdk";
 import AccessNotice from "@/components/AccessNotice";
 import AppHeader from "@/components/AppHeader";
 import PageLoader from "@/components/PageLoader";
 import { clearPracticeDraft, loadPracticeDraft } from "@/lib/practice-draft";
-import { supabaseBrowser } from "@/lib/supabase";
-import { useStudentAccess } from "@/lib/student-access";
+import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 export default function PracticeSummaryPage() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
   const slug = typeof params.slug === "string" ? params.slug : null;
-  const { loading: accessLoading, user, membership, allowed, error: accessError } = useStudentAccess();
+  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const accessLoading = access.loading;
+  const user = access.user;
+  const membership = access.membership;
+  const allowed = access.isStudent && access.hasActiveMembership;
+  const accessError = allowed
+    ? null
+    : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
   const [draft, setDraft] = useState<PracticeDraft | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -61,8 +68,7 @@ export default function PracticeSummaryPage() {
     setError(null);
 
     try {
-      const client = supabaseBrowser();
-      const session = await createPracticeSession(client, {
+      const session = await startStudentPracticeSession(browserStudentRepository, {
         tenantId: membership.tenant_id,
         userId: user.id,
         topicId: draft.topicId,
@@ -78,7 +84,7 @@ export default function PracticeSummaryPage() {
         selected_option_ids: draft.answers[question.question_id] ? [draft.answers[question.question_id]] : [],
       }));
 
-      const result = await submitPracticeAttempt(client, {
+      const result = await submitStudentPracticeAttempt(browserStudentRepository, {
         practiceSessionId: session.id,
         topicId: draft.topicId,
         answers: payload,
