@@ -13,7 +13,7 @@
   "scripts": {
     "dev:all": "npm run -ws --if-present dev",
     "build:all": "npm run -ws --if-present build",
-    "lint:all": "npm run -ws --if-present lint",
+    "lint:all": "npm run --workspaces --if-present lint",
     "typecheck": "npm run -ws --if-present typecheck",
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:mobile": "npm run dev --workspace=apps/mobile",
