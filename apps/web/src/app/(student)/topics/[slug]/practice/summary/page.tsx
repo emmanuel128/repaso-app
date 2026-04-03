@@ -24,27 +24,26 @@ export default function PracticeSummaryPage() {
   const accessError = allowed
     ? null
     : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
-  const [draft, setDraft] = useState<PracticeDraft | null>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const draft = useMemo<PracticeDraft | null>(() => {
+    if (!allowed || !slug || !user) {
+      return null;
+    }
+
+    return loadPracticeDraft(user.id, slug);
+  }, [allowed, slug, user]);
 
   useEffect(() => {
     if (accessLoading || !allowed || !slug || !user) {
       return;
     }
 
-    const storedDraft = loadPracticeDraft(user.id, slug);
-
-    if (!storedDraft) {
+    if (!draft) {
       router.replace(`/topics/${slug}/practice`);
-      return;
     }
-
-    setDraft(storedDraft);
-    setError(null);
-    setLoading(false);
-  }, [accessLoading, allowed, router, slug, user]);
+  }, [accessLoading, allowed, draft, router, slug, user]);
 
   const answeredCount = useMemo(
     () => Object.values(draft?.answers ?? {}).filter(Boolean).length,
@@ -111,7 +110,7 @@ export default function PracticeSummaryPage() {
     );
   }
 
-  if (!slug || accessLoading || loading || !draft) {
+  if (!slug || accessLoading || !draft) {
     return <PageLoader label="Preparando resumen..." />;
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useResolvedCurrentAccess } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
@@ -8,26 +9,25 @@ import StudentDashboard from "@/app/(student)/dashboard/student-dashboard";
 import { currentAccessDependencies } from "@/lib/repaso-dependencies";
 import { toUserRole, type UserRole } from "@/lib/user-role";
 
-function OwnerDashboardPlaceholder() {
-  return <div>Owner Dashboard</div>;
-}
-
-function AdminDashboardPlaceholder() {
-  return <div>Admin Dashboard</div>;
-}
-
-function InstructorDashboardPlaceholder() {
-  return <div>Instructor Dashboard</div>;
-}
-
-const DASHBOARD_BY_ROLE: Record<Exclude<UserRole, "Student">, ComponentType> = {
-  Owner: OwnerDashboardPlaceholder,
-  Admin: AdminDashboardPlaceholder,
-  Instructor: InstructorDashboardPlaceholder,
+const REDIRECT_BY_ROLE: Record<Exclude<UserRole, "Student">, string> = {
+  Owner: "/owner",
+  Admin: "/admin",
+  Instructor: "/instructor",
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const access = useResolvedCurrentAccess(currentAccessDependencies);
+
+  const userRole = toUserRole(access.role);
+
+  useEffect(() => {
+    if (access.loading || !access.isAuthenticated || !userRole || userRole === "Student") {
+      return;
+    }
+
+    router.replace(REDIRECT_BY_ROLE[userRole]);
+  }, [access.isAuthenticated, access.loading, router, userRole]);
 
   if (access.loading) {
     return <PageLoader label="Cargando dashboard..." />;
@@ -41,8 +41,6 @@ export default function DashboardPage() {
       />
     );
   }
-
-  const userRole = toUserRole(access.role);
 
   if (!userRole) {
     return (
@@ -58,10 +56,8 @@ export default function DashboardPage() {
       return <StudentDashboard />;
     case "Owner":
     case "Admin":
-    case "Instructor": {
-      const RoleDashboard = DASHBOARD_BY_ROLE[userRole];
-      return <RoleDashboard />;
-    }
+    case "Instructor":
+      return <PageLoader label="Redirigiendo a tu área de trabajo..." />;
     default:
       return (
         <AccessNotice

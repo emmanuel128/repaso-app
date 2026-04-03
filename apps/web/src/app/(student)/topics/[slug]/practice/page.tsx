@@ -33,7 +33,7 @@ export default function PracticePage() {
     QUESTION_LIMIT
   );
   const detail = content?.detail ?? null;
-  const questions = content?.questions ?? [];
+  const questions = useMemo(() => content?.questions ?? [], [content?.questions]);
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<string[]>([]);
   const [pendingFlagIds, setPendingFlagIds] = useState<string[]>([]);

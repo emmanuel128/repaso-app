@@ -2,26 +2,26 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { RoleType } from "@repaso/domain";
+import type { CurrentAccess } from "@repaso/domain";
 import { useResolvedCurrentAccess } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
 import { currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 interface RoleGuardLayoutProps {
-  allowedRoles: RoleType[];
+  authorize: (access: CurrentAccess) => boolean;
   areaLabel: string;
   children: ReactNode;
 }
 
 export default function RoleGuardLayout({
-  allowedRoles,
+  authorize,
   areaLabel,
   children,
 }: RoleGuardLayoutProps) {
   const router = useRouter();
   const access = useResolvedCurrentAccess(currentAccessDependencies);
-  const isAuthorized = access.role ? allowedRoles.includes(access.role) : false;
+  const isAuthorized = authorize(access);
 
   useEffect(() => {
     if (access.loading) {

@@ -6,7 +6,10 @@ export default function OwnerLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <RoleGuardLayout allowedRoles={["owner"]} areaLabel="Owner">
+    <RoleGuardLayout
+      authorize={(access) => access.isAuthenticated && access.role === "owner"}
+      areaLabel="Owner"
+    >
       {children}
     </RoleGuardLayout>
   );
