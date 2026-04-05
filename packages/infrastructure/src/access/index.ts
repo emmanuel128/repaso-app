@@ -1,0 +1,1 @@
+export { createSupabaseAccessRepository } from "./repository";

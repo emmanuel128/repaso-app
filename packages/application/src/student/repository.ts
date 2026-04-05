@@ -1,22 +1,11 @@
-import type {
-  Area,
-  AttemptReviewQuestion,
-  DashboardSnapshot,
-  GlobalSearchGroup,
-  PracticeQuestion,
-  PracticeSession,
-  PracticeSubmissionSummary,
-  SelectedAnswer,
-  Topic,
-  TopicDetail,
-} from "@repaso/domain";
+import { Student as DomainStudent } from "@repaso/domain";
 
 export interface StudentRepository {
-  fetchAreas(): Promise<Area[]>;
-  fetchTopics(): Promise<Topic[]>;
-  fetchTopicDetail(slug: string): Promise<TopicDetail | null>;
-  searchContent(query: string, limitPerCategory?: number): Promise<GlobalSearchGroup[]>;
-  fetchPracticeQuestions(topicId: string, limit?: number): Promise<PracticeQuestion[]>;
+  fetchAreas(): Promise<DomainStudent.Area[]>;
+  fetchTopics(): Promise<DomainStudent.Topic[]>;
+  fetchTopicDetail(slug: string): Promise<DomainStudent.TopicDetail | null>;
+  searchContent(query: string, limitPerCategory?: number): Promise<DomainStudent.GlobalSearchGroup[]>;
+  fetchPracticeQuestions(topicId: string, limit?: number): Promise<DomainStudent.PracticeQuestion[]>;
   fetchQuestionFlags(questionIds: string[]): Promise<string[]>;
   setQuestionFlag(input: {
     tenantId: string;
@@ -29,12 +18,12 @@ export interface StudentRepository {
     userId: string;
     topicId: string;
     config?: Record<string, unknown>;
-  }): Promise<PracticeSession>;
+  }): Promise<DomainStudent.PracticeSession>;
   submitPracticeAttempt(input: {
     practiceSessionId: string;
     topicId: string;
-    answers: SelectedAnswer[];
-  }): Promise<PracticeSubmissionSummary>;
-  fetchAttemptReview(attemptId: string): Promise<AttemptReviewQuestion[]>;
-  fetchDashboardSnapshot(): Promise<DashboardSnapshot>;
+    answers: DomainStudent.SelectedAnswer[];
+  }): Promise<DomainStudent.PracticeSubmissionSummary>;
+  fetchAttemptReview(attemptId: string): Promise<DomainStudent.AttemptReviewQuestion[]>;
+  fetchDashboardSnapshot(): Promise<DomainStudent.DashboardSnapshot>;
 }

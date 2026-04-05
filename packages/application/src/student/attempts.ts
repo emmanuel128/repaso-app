@@ -1,9 +1,9 @@
-import type { AttemptReviewQuestion } from "@repaso/domain";
+import { Student as DomainStudent } from "@repaso/domain";
 import type { StudentRepository } from "./repository";
 
 export async function getStudentAttemptReview(
   repository: StudentRepository,
   attemptId: string
-): Promise<AttemptReviewQuestion[]> {
+): Promise<DomainStudent.AttemptReviewQuestion[]> {
   return repository.fetchAttemptReview(attemptId);
 }

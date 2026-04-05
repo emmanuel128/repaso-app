@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStudentPracticeContent, type StudentRepository } from "@repaso/application";
-import type { StudentPracticeContent } from "@repaso/domain";
+import { Student as ApplicationStudent } from "@repaso/application";
+import { Student as DomainStudent } from "@repaso/domain";
 
 export function useStudentPracticeContent(
-  repository: StudentRepository,
+  repository: ApplicationStudent.StudentRepository,
   slug: string | null,
   questionLimit = 5
 ) {
-  const [content, setContent] = useState<StudentPracticeContent | null>(null);
+  const [content, setContent] = useState<DomainStudent.StudentPracticeContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +24,7 @@ export function useStudentPracticeContent(
     let mounted = true;
     setLoading(true);
 
-    getStudentPracticeContent(repository, slug, questionLimit)
+    ApplicationStudent.getStudentPracticeContent(repository, slug, questionLimit)
       .then((data) => {
         if (!mounted) {
           return;

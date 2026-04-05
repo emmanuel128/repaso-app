@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { searchStudentContent, type StudentRepository } from "@repaso/application";
-import type { GlobalSearchGroup } from "@repaso/domain";
+import { Student as ApplicationStudent } from "@repaso/application";
+import { Student as DomainStudent } from "@repaso/domain";
 
 export function useStudentGlobalSearch(
-  repository: StudentRepository,
+  repository: ApplicationStudent.StudentRepository,
   query: string,
   enabled = true
 ) {
-  const [results, setResults] = useState<GlobalSearchGroup[]>([]);
+  const [results, setResults] = useState<DomainStudent.GlobalSearchGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +24,7 @@ export function useStudentGlobalSearch(
     let mounted = true;
     setLoading(true);
 
-    searchStudentContent(repository, query)
+    ApplicationStudent.searchStudentContent(repository, query)
       .then((data) => {
         if (!mounted) {
           return;

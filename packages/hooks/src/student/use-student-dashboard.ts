@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStudentDashboardSnapshot, type StudentRepository } from "@repaso/application";
-import type { DashboardSnapshot } from "@repaso/domain";
+import { Student as ApplicationStudent } from "@repaso/application";
+import { Student as DomainStudent } from "@repaso/domain";
 
-export function useStudentDashboard(repository: StudentRepository) {
-  const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null);
+export function useStudentDashboard(repository: ApplicationStudent.StudentRepository) {
+  const [snapshot, setSnapshot] = useState<DomainStudent.DashboardSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,7 +13,7 @@ export function useStudentDashboard(repository: StudentRepository) {
     let mounted = true;
 
     setLoading(true);
-    getStudentDashboardSnapshot(repository)
+    ApplicationStudent.getStudentDashboardSnapshot(repository)
       .then((data) => {
         if (!mounted) {
           return;

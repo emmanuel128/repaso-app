@@ -1,0 +1,1 @@
+export { createSupabaseStudentRepository } from "./repository";

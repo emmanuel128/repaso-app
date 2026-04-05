@@ -1,5 +1,5 @@
-import type { AccessRepository } from "@repaso/application";
-import type { Membership, RoleType, TenantContext } from "@repaso/domain";
+import type { Access } from "@repaso/application";
+import type { Shared } from "@repaso/domain";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 function normalizeSingleRelation<T>(value: T | T[] | null | undefined): T | null {
@@ -10,9 +10,9 @@ function normalizeSingleRelation<T>(value: T | T[] | null | undefined): T | null
   return value ?? null;
 }
 
-export function createSupabaseAccessRepository(client: SupabaseClient): AccessRepository {
+export function createSupabaseAccessRepository(client: SupabaseClient): Access.AccessRepository {
   return {
-    async fetchCurrentMembership(): Promise<Membership | null> {
+    async fetchCurrentMembership(): Promise<Shared.Membership | null> {
       const { data, error } = await client
         .from("memberships")
         .select("*")
@@ -23,12 +23,12 @@ export function createSupabaseAccessRepository(client: SupabaseClient): AccessRe
         throw error;
       }
 
-      return ((data ?? [])[0] ?? null) as Membership | null;
+      return ((data ?? [])[0] ?? null) as Shared.Membership | null;
     },
 
     async fetchCurrentTenantRole(
       userId: string
-    ): Promise<{ tenant: TenantContext; role: RoleType } | null> {
+    ): Promise<{ tenant: Shared.TenantContext; role: Shared.RoleType } | null> {
       const { data, error } = await client
         .from("user_tenants")
         .select("tenant_id, role, tenants(name, slug, is_active)")
@@ -42,7 +42,7 @@ export function createSupabaseAccessRepository(client: SupabaseClient): AccessRe
       const row = (data ?? [])[0] as
         | {
             tenant_id: string;
-            role: RoleType;
+            role: Shared.RoleType;
             tenants?: { name: string; slug: string; is_active: boolean }[] | { name: string; slug: string; is_active: boolean } | null;
           }
         | undefined;

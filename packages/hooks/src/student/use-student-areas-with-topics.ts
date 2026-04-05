@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStudentAreasWithTopics, type StudentRepository } from "@repaso/application";
-import type { AreaWithTopics } from "@repaso/domain";
+import { Student as ApplicationStudent } from "@repaso/application";
+import { Student as DomainStudent } from "@repaso/domain";
 
-export function useStudentAreasWithTopics(repository: StudentRepository) {
-  const [areas, setAreas] = useState<AreaWithTopics[]>([]);
+export function useStudentAreasWithTopics(repository: ApplicationStudent.StudentRepository) {
+  const [areas, setAreas] = useState<DomainStudent.AreaWithTopics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,7 +13,7 @@ export function useStudentAreasWithTopics(repository: StudentRepository) {
     let mounted = true;
 
     setLoading(true);
-    getStudentAreasWithTopics(repository)
+    ApplicationStudent.getStudentAreasWithTopics(repository)
       .then((data) => {
         if (!mounted) {
           return;

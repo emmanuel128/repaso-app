@@ -1,9 +1,9 @@
-import type { AreaWithTopics, TopicDetail } from "@repaso/domain";
+import { Student as DomainStudent } from "@repaso/domain";
 import type { StudentRepository } from "./repository";
 
 export async function getStudentAreasWithTopics(
   repository: StudentRepository
-): Promise<AreaWithTopics[]> {
+): Promise<DomainStudent.AreaWithTopics[]> {
   const [areas, topics] = await Promise.all([
     repository.fetchAreas(),
     repository.fetchTopics(),
@@ -26,6 +26,6 @@ export async function getStudentAreasWithTopics(
 export async function getStudentTopicDetail(
   repository: StudentRepository,
   slug: string
-): Promise<TopicDetail | null> {
+): Promise<DomainStudent.TopicDetail | null> {
   return repository.fetchTopicDetail(slug);
 }

@@ -1,21 +1,7 @@
-import type { StudentRepository } from "@repaso/application";
-import type {
-  AttemptReviewQuestion,
-  DashboardAttemptRow,
-  DashboardProgressRow,
-  DashboardSnapshot,
-  GlobalSearchCategory,
-  GlobalSearchGroup,
-  GlobalSearchResult,
-  PracticeQuestion,
-  PracticeSession,
-  PracticeSubmissionSummary,
-  SelectedAnswer,
-  Topic,
-  TopicDetail,
-} from "@repaso/domain";
+import type { Student as ApplicationStudent } from "@repaso/application";
+import type { Student as DomainStudent } from "@repaso/domain";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createSupabaseAccessRepository } from "../shared/access-repository";
+import { createSupabaseAccessRepository } from "../access";
 
 const SNIPPET_CONTEXT_BEFORE = 55;
 const SNIPPET_CONTEXT_AFTER = 85;
@@ -70,7 +56,9 @@ function buildSnippetText(title: string, content?: string | null): string {
   return [title, content ?? ""].filter(Boolean).join(" ");
 }
 
-function mapSearchGroups(results: Record<GlobalSearchCategory, GlobalSearchResult[]>): GlobalSearchGroup[] {
+function mapSearchGroups(
+  results: Record<DomainStudent.GlobalSearchCategory, DomainStudent.GlobalSearchResult[]>
+): DomainStudent.GlobalSearchGroup[] {
   return [
     { category: "topics", label: "Temas", results: results.topics },
     { category: "clinical_cases", label: "Casos clínicos", results: results.clinical_cases },
@@ -82,7 +70,10 @@ function escapePostgrestLikeValue(value: string): string {
   return value.replace(/([,%()])/g, "\\$1");
 }
 
-async function fetchTopicBySlug(client: SupabaseClient, slug: string): Promise<Topic | null> {
+async function fetchTopicBySlug(
+  client: SupabaseClient,
+  slug: string
+): Promise<DomainStudent.Topic | null> {
   const { data, error } = await client
     .from("topics")
     .select("*")
@@ -94,10 +85,12 @@ async function fetchTopicBySlug(client: SupabaseClient, slug: string): Promise<T
     throw error;
   }
 
-  return (data ?? null) as Topic | null;
+  return (data ?? null) as DomainStudent.Topic | null;
 }
 
-export function createSupabaseStudentRepository(client: SupabaseClient): StudentRepository {
+export function createSupabaseStudentRepository(
+  client: SupabaseClient
+): ApplicationStudent.StudentRepository {
   const accessRepository = createSupabaseAccessRepository(client);
 
   return {
@@ -129,7 +122,7 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
       return data ?? [];
     },
 
-    async fetchTopicDetail(slug: string): Promise<TopicDetail | null> {
+    async fetchTopicDetail(slug: string): Promise<DomainStudent.TopicDetail | null> {
       const topic = await fetchTopicBySlug(client, slug);
 
       if (!topic) {
@@ -175,15 +168,15 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
 
       return {
         topic,
-        notes: (notesResult.data ?? []) as TopicDetail["notes"],
-        mnemonics: (mnemonicsResult.data ?? []) as TopicDetail["mnemonics"],
-        cases: (casesResult.data ?? []) as TopicDetail["cases"],
-        progress: (progressResult.data ?? null) as TopicDetail["progress"],
+        notes: (notesResult.data ?? []) as DomainStudent.TopicDetail["notes"],
+        mnemonics: (mnemonicsResult.data ?? []) as DomainStudent.TopicDetail["mnemonics"],
+        cases: (casesResult.data ?? []) as DomainStudent.TopicDetail["cases"],
+        progress: (progressResult.data ?? null) as DomainStudent.TopicDetail["progress"],
         questionCount: questionCountResult.count ?? 0,
       };
     },
 
-    async searchContent(query: string, limitPerCategory = 8): Promise<GlobalSearchGroup[]> {
+    async searchContent(query: string, limitPerCategory = 8): Promise<DomainStudent.GlobalSearchGroup[]> {
       const trimmedQuery = query.trim();
 
       if (!trimmedQuery) {
@@ -272,7 +265,10 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
       });
     },
 
-    async fetchPracticeQuestions(topicId: string, limit = 10): Promise<PracticeQuestion[]> {
+    async fetchPracticeQuestions(
+      topicId: string,
+      limit = 10
+    ): Promise<DomainStudent.PracticeQuestion[]> {
       const { data, error } = await client.rpc("get_topic_practice_questions", {
         p_topic_id: topicId,
         p_limit: limit,
@@ -282,7 +278,7 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
         throw error;
       }
 
-      return ((data ?? []) as PracticeQuestion[]).map((question) => ({
+      return ((data ?? []) as DomainStudent.PracticeQuestion[]).map((question) => ({
         ...question,
         options: [...question.options].sort((a, b) => a.order_index - b.order_index),
       }));
@@ -338,7 +334,7 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
       }
     },
 
-    async createPracticeSession(input): Promise<PracticeSession> {
+    async createPracticeSession(input): Promise<DomainStudent.PracticeSession> {
       const { data, error } = await client
         .from("practice_sessions")
         .insert({
@@ -354,10 +350,10 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
         throw error;
       }
 
-      return data as PracticeSession;
+      return data as DomainStudent.PracticeSession;
     },
 
-    async submitPracticeAttempt(input): Promise<PracticeSubmissionSummary> {
+    async submitPracticeAttempt(input): Promise<DomainStudent.PracticeSubmissionSummary> {
       const { data, error } = await client.rpc("submit_practice_attempt", {
         p_practice_session_id: input.practiceSessionId,
         p_topic_id: input.topicId,
@@ -374,10 +370,10 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
         throw new Error("Practice submission did not return a result.");
       }
 
-      return row as PracticeSubmissionSummary;
+      return row as DomainStudent.PracticeSubmissionSummary;
     },
 
-    async fetchAttemptReview(attemptId: string): Promise<AttemptReviewQuestion[]> {
+    async fetchAttemptReview(attemptId: string): Promise<DomainStudent.AttemptReviewQuestion[]> {
       const { data, error } = await client.rpc("get_attempt_review", {
         p_attempt_id: attemptId,
       });
@@ -386,10 +382,10 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
         throw error;
       }
 
-      return (data ?? []) as AttemptReviewQuestion[];
+      return (data ?? []) as DomainStudent.AttemptReviewQuestion[];
     },
 
-    async fetchDashboardSnapshot(): Promise<DashboardSnapshot> {
+    async fetchDashboardSnapshot(): Promise<DomainStudent.DashboardSnapshot> {
       const [membership, answersResult, progressResult, attemptsResult] = await Promise.all([
         accessRepository.fetchCurrentMembership(),
         client.from("attempt_answers").select("is_correct"),
@@ -415,7 +411,7 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
       const completedQuestions = answers.length;
       const correctAnswers = answers.filter((row) => row.is_correct).length;
       const accuracy = completedQuestions > 0 ? Math.round((correctAnswers / completedQuestions) * 100) : 0;
-      const progressByTopic: DashboardProgressRow[] = (progressResult.data ?? []).map((row: any) => ({
+      const progressByTopic: DomainStudent.DashboardProgressRow[] = (progressResult.data ?? []).map((row: any) => ({
         topic_id: row.topic_id,
         total_correct: row.total_correct,
         total_incorrect: row.total_incorrect,
@@ -423,7 +419,7 @@ export function createSupabaseStudentRepository(client: SupabaseClient): Student
         last_attempt_at: row.last_attempt_at,
         topics: normalizeSingleRelation(row.topics),
       }));
-      const recentAttempts: DashboardAttemptRow[] = (attemptsResult.data ?? []).map((row: any) => {
+      const recentAttempts: DomainStudent.DashboardAttemptRow[] = (attemptsResult.data ?? []).map((row: any) => {
         const practiceSession = normalizeSingleRelation(row.practice_sessions);
         return {
           id: row.id,

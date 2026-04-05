@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStudentAttemptReview, type StudentRepository } from "@repaso/application";
-import type { AttemptReviewQuestion } from "@repaso/domain";
+import { Student as ApplicationStudent } from "@repaso/application";
+import { Student as DomainStudent } from "@repaso/domain";
 
 export function useStudentAttemptReview(
-  repository: StudentRepository,
+  repository: ApplicationStudent.StudentRepository,
   attemptId: string | null
 ) {
-  const [review, setReview] = useState<AttemptReviewQuestion[]>([]);
+  const [review, setReview] = useState<DomainStudent.AttemptReviewQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +23,7 @@ export function useStudentAttemptReview(
     let mounted = true;
     setLoading(true);
 
-    getStudentAttemptReview(repository, attemptId)
+    ApplicationStudent.getStudentAttemptReview(repository, attemptId)
       .then((data) => {
         if (!mounted) {
           return;

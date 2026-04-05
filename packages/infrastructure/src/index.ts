@@ -1,4 +1,6 @@
-export { createRepasoAuth, RepasoAuth } from "./shared/auth";
-export { makeSupabaseClient } from "./shared/client";
-export { createSupabaseAccessRepository } from "./shared/access-repository";
-export { createSupabaseStudentRepository } from "./student/repository";
+export * as Access from "./access";
+export * as Admin from "./admin";
+export * as Instructor from "./instructor";
+export * as Owner from "./owner";
+export * as Shared from "./shared";
+export * as Student from "./student";

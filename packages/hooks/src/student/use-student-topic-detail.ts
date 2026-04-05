@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStudentTopicDetail, type StudentRepository } from "@repaso/application";
-import type { TopicDetail } from "@repaso/domain";
+import { Student as ApplicationStudent } from "@repaso/application";
+import { Student as DomainStudent } from "@repaso/domain";
 
 export function useStudentTopicDetail(
-  repository: StudentRepository,
+  repository: ApplicationStudent.StudentRepository,
   slug: string | null
 ) {
-  const [detail, setDetail] = useState<TopicDetail | null>(null);
+  const [detail, setDetail] = useState<DomainStudent.TopicDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +23,7 @@ export function useStudentTopicDetail(
     let mounted = true;
     setLoading(true);
 
-    getStudentTopicDetail(repository, slug)
+    ApplicationStudent.getStudentTopicDetail(repository, slug)
       .then((data) => {
         if (!mounted) {
           return;

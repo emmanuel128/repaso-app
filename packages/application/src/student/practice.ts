@@ -1,15 +1,11 @@
-import type {
-  PracticeSubmissionSummary,
-  SelectedAnswer,
-  StudentPracticeContent,
-} from "@repaso/domain";
+import { Student as DomainStudent } from "@repaso/domain";
 import type { StudentRepository } from "./repository";
 
 export async function getStudentPracticeContent(
   repository: StudentRepository,
   slug: string,
   questionLimit = 5
-): Promise<StudentPracticeContent> {
+): Promise<DomainStudent.StudentPracticeContent> {
   const detail = await repository.fetchTopicDetail(slug);
 
   if (!detail) {
@@ -57,8 +53,8 @@ export async function submitStudentPracticeAttempt(
   input: {
     practiceSessionId: string;
     topicId: string;
-    answers: SelectedAnswer[];
+    answers: DomainStudent.SelectedAnswer[];
   }
-): Promise<PracticeSubmissionSummary> {
+): Promise<DomainStudent.PracticeSubmissionSummary> {
   return repository.submitPracticeAttempt(input);
 }
