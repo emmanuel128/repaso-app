@@ -10,8 +10,8 @@ export default function MarkdownContent({ content, className }: MarkdownContentP
     <div className={["markdown-content", className].filter(Boolean).join(" ")}>
       <ReactMarkdown
         components={{
-          a: ({ node: _node, ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
-          code: ({ node: _node, className: codeClassName, ...props }) => <code className={codeClassName} {...props} />,
+          a: ({ ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
+          code: ({ className: codeClassName, ...props }) => <code className={codeClassName} {...props} />,
         }}
       >
         {content}

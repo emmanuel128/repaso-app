@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Web App
 
-## Getting Started
+Next.js 16 App Router application for the current Repaso student experience, with route-group scaffolding for future owner, admin, and instructor surfaces.
 
-First, run the development server:
+## Current Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- `src/app/(student)`: current student-facing routes
+- `src/app/(owner)`: placeholder owner routes and layout
+- `src/app/(admin)`: placeholder admin routes and layout
+- `src/app/(instructor)`: placeholder instructor routes and layout
+- `src/app/dashboard/page.tsx`: role-based dashboard switcher
+- `src/components`: shared web UI
+- `src/components/RepasoProviders.tsx`: root provider assembly for shared access and student dependencies
+- `src/lib/supabase.ts`: low-level web Supabase/auth bootstrap
+- `src/lib/repaso-dependencies.ts`: web dependency composition boundary
+- `src/lib/role-authorization.ts`: shared role-area authorization helpers for guarded layouts
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Dependency Rules
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Web routes and components should consume shared access and student logic through namespaced hooks from `@repaso/hooks`
+- Web routes and components may use `@repaso/domain` types, but should not import `@repaso/application` or `@repaso/infrastructure` directly
+- `src/components/RepasoProviders.tsx` is the root context bridge that wires web dependencies into `@repaso/hooks`
+- Infrastructure assembly for the web app lives behind `src/lib/repaso-dependencies.ts`
+- `src/lib/supabase.ts` and `src/lib/repaso-dependencies.ts` are the allowed web boundary to infrastructure
+- Role-gated layouts should reuse helpers from `src/lib/role-authorization.ts` instead of inline role predicates
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Current User-Facing Routes
 
-## Learn More
+- `/`
+- `/login`
+- `/signup`
+- `/dashboard`
+- `/topics`
+- `/topics/[slug]`
+- `/topics/[slug]/practice`
+- `/topics/[slug]/practice/summary`
+- `/search`
+- `/attempts/[attemptId]`
+- `/owner`
+- `/admin`
+- `/instructor`
 
-To learn more about Next.js, take a look at the following resources:
+## Authorization Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `Access.useCurrentAccess()` is the shared headless access hook consumed by the web app
+- `(admin)`, `(instructor)`, and `(owner)` layouts are guarded through `RoleGuardLayout` plus shared helpers in `src/lib/role-authorization.ts`
+- The current role rules are exact-match checks for `admin`, `instructor`, and `owner`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Commands
 
-## Deploy on Vercel
+Run from the repository root unless you need workspace-local execution.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Dev: `npm run dev:web`
+- Local workspace dev: `npm run dev --workspace=apps/web`
+- Build: `npm run build --workspace=apps/web`
+- Lint: `npm run lint --workspace=apps/web`
+- Typecheck: `npm run typecheck --workspace=apps/web`

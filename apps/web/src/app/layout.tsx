@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
+import RepasoProviders from "@/components/RepasoProviders";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,7 +32,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <RepasoProviders>{children}</RepasoProviders>
       </body>
     </html>
   );

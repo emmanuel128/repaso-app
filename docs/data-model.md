@@ -71,6 +71,16 @@ Constraint to keep in mind:
 - the hook currently selects one row from `user_tenants` for a user without explicit ordering or tenant selection logic
 - if a user belongs to multiple tenants, the token will reflect whichever row is returned by the query
 
+Application note:
+
+- the web app now resolves current access through the neutral shared access stack:
+  - `@repaso/infrastructure.Access`
+  - `@repaso/application.Access`
+  - `@repaso/hooks.Access`
+- role-aware UI routing should centralize its app-level authorization predicates in `@repaso/domain.Access`
+- `CurrentAccess` includes first-class role booleans for `isStudent`, `isInstructor`, `isAdmin`, and `isOwner`
+- the JWT and RLS model here remains the backend source of truth; package-level access policy should mirror it rather than replacing it
+
 ## Enum Types
 
 ### `role_type`
