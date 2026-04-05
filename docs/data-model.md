@@ -73,8 +73,13 @@ Constraint to keep in mind:
 
 Application note:
 
-- the web app now resolves current access through shared `domain/application/infrastructure/hooks` layers and a generic authenticated student shell
-- role-aware UI routing should continue to treat the JWT and RLS model here as the backend source of truth
+- the web app now resolves current access through the neutral shared access stack:
+  - `@repaso/infrastructure.Access`
+  - `@repaso/application.Access`
+  - `@repaso/hooks.Access`
+- role-aware UI routing should centralize its app-level authorization predicates in `@repaso/domain.Access`
+- `CurrentAccess` includes first-class role booleans for `isStudent`, `isInstructor`, `isAdmin`, and `isOwner`
+- the JWT and RLS model here remains the backend source of truth; package-level access policy should mirror it rather than replacing it
 
 ## Enum Types
 

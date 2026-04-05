@@ -51,12 +51,34 @@
   - Supabase → Postgres / Storage / Edge Functions
 - **Boundaries:**
   - Frontend: UI + role shells + shared React hooks
-  - Application: use cases and orchestration
-  - Infrastructure: Supabase auth, persistence, and repository implementations
+  - Application: namespaced use cases and neutral access orchestration
+  - Infrastructure: namespaced Supabase auth, persistence, and repository implementations
   - Backend: critical business rules in DB/RLS and Edge Functions
   - DB: source of truth
 - **Shared code:** `packages/domain`, `packages/application`, `packages/infrastructure`, `packages/hooks`
 - **Web-specific dependency assembly:** `apps/web/src/lib/repaso-dependencies.ts`
+
+### Shared Package API Shape
+- Package roots now expose **namespaced exports only**:
+  - `@repaso/domain`: `Access`, `Admin`, `Instructor`, `Owner`, `Shared`, `Student`
+  - `@repaso/application`: `Access`, `Admin`, `Instructor`, `Owner`, `Student`
+  - `@repaso/infrastructure`: `Access`, `Admin`, `Instructor`, `Owner`, `Shared`, `Student`
+  - `@repaso/hooks`: `Access`, `Admin`, `Instructor`, `Owner`, `Student`
+- Access orchestration is centralized in `packages/application/src/access`.
+- Access policy and role predicates are centralized in `packages/domain/src/access`.
+- Role-aware business logic must not live under `shared`; `shared` is reserved for primitive/base utilities and types.
+
+### Current Access Composition
+- `CurrentAccess` is resolved through the neutral package stack:
+  - `@repaso/infrastructure.Access.createSupabaseAccessRepository`
+  - `@repaso/application.Access.resolveCurrentAccess`
+  - `@repaso/hooks.Access.CurrentAccessProvider` / `@repaso/hooks.Access.useCurrentAccess`
+- `CurrentAccess` includes first-class booleans for:
+  - `isStudent`
+  - `isInstructor`
+  - `isAdmin`
+  - `isOwner`
+- Web role authorization should delegate to `@repaso/domain.Access` instead of duplicating local role comparisons.
 
 ### Current Web Routing Shape
 - Student routes remain user-facing at:
@@ -95,6 +117,7 @@
 - **Auth:** Supabase Auth
 - **Roles:** owner, admin, instructor, student
 - **Authorization:** route/layout guards in web plus RLS-backed data constraints
+- **Client policy source:** `@repaso/domain.Access` is the shared source of truth for app-level route authorization
 - **Tokens:** JWT managed by Supabase
 - **Critical rule:** never expose SERVICE_ROLE_KEY in client
 
@@ -123,3 +146,4 @@
 - Do not move sensitive logic to the client
 - Do not simplify by removing RLS, roles, or package separation
 - Web routes and components should consume shared hooks/use-cases and should not import `@repaso/infrastructure` directly; that wiring belongs in the web `lib` boundary
+- Web code should consume package public APIs by namespace (for example `Domain.Access`, `Application.Access`, `Hooks.Access`) rather than package-internal source paths

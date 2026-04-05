@@ -7,6 +7,7 @@ Estas instrucciones permiten que un agente de IA sea productivo rápidamente en 
 - Backend "serverless" apoyado en Supabase (Auth, Postgres, Storage, Edge Functions); evita construir un backend Express a menos que sea imprescindible.
 - Diseño whitelabel: el núcleo de lógica debe ser parametrizable por tenant/examen. Mantén configuraciones separables.
 - La lógica compartida sigue una arquitectura por capas: `packages/domain`, `packages/application`, `packages/infrastructure` y `packages/hooks`.
+- Los paquetes compartidos exponen APIs públicas por namespaces (`Access`, `Student`, `Shared`, etc.); evita imports a rutas internas de `packages/*/src/...`.
 - La app web actual usa route groups internos para `(student)`, `(owner)`, `(admin)` e `(instructor)` y un `dashboard` con role switcher.
 
 ## 📁 Patrones de Organización
@@ -46,9 +47,23 @@ repaso-app/
 │
 ├── packages/
 │   ├── domain/
+│   │   └── src/
+│   │       ├── access/
+│   │       ├── shared/
+│   │       └── student/
 │   ├── application/
+│   │   └── src/
+│   │       ├── access/
+│   │       └── student/
 │   ├── infrastructure/
+│   │   └── src/
+│   │       ├── access/
+│   │       ├── shared/
+│   │       └── student/
 │   └── hooks/
+│       └── src/
+│           ├── access/
+│           └── student/
 │
 ├── .github/
 │   └── instructions/
@@ -137,22 +152,42 @@ Tipos: feat | fix | chore | docs | test | refactor
 - React Query / SWR no forman parte del stack actual; no los introduzcas por defecto sin una necesidad clara.
 - Manejo de estado global mínimo; preferir hooks por feature.
 - No coloques queries Supabase directamente en páginas o componentes. Usa `application` + `infrastructure` + `hooks`.
-- No importes `@repaso/infrastructure` directamente desde páginas o componentes web. Usa `apps/web/src/lib/repaso-dependencies.ts` como boundary de composición para web.
+- Las páginas y componentes web deben consumir lógica compartida vía namespaces de `@repaso/hooks` y tipos de `@repaso/domain`.
+- No importes `@repaso/application` ni `@repaso/infrastructure` directamente desde páginas o componentes web. Usa `apps/web/src/lib/repaso-dependencies.ts` como boundary de composición para web y `apps/web/src/components/RepasoProviders.tsx` para inyectar dependencias a los hooks.
+- Para autorización de layouts y áreas en web, centraliza los predicados en `apps/web/src/lib/role-authorization.ts` y evita checks inline de roles.
 - Evita checks de acceso por página si el shell autenticado compartido puede resolverlos una sola vez.
 
 ## 🧱 Capas Compartidas
-- `packages/domain`: entidades, DTOs, enums, reglas puras y predicados de acceso.
-- `packages/application`: casos de uso y contratos de repositorios/servicios.
-- `packages/infrastructure`: cliente Supabase, auth adapters y repositorios concretos.
-- `packages/hooks`: hooks React que adaptan la capa de aplicación a web y móvil.
+- `packages/domain`: tipos base, modelos por slice y predicados/reglas puras. La política de acceso vive en `domain/Access`; los primitivos viven en `domain/Shared`.
+- `packages/application`: casos de uso y contratos de repositorios/servicios. La orquestación neutral de acceso vive en `application/Access`.
+- `packages/infrastructure`: cliente Supabase, auth adapters y repositorios concretos. Los adaptadores neutrales de acceso viven en `infrastructure/Access`.
+- `packages/hooks`: hooks React y providers. La composición compartida de acceso vive en `hooks/Access`; hooks por feature viven en slices como `hooks/Student`.
+
+Namespaces públicos actuales:
+- `@repaso/domain`: `Access`, `Admin`, `Instructor`, `Owner`, `Shared`, `Student`
+- `@repaso/application`: `Access`, `Admin`, `Instructor`, `Owner`, `Student`
+- `@repaso/infrastructure`: `Access`, `Admin`, `Instructor`, `Owner`, `Shared`, `Student`
+- `@repaso/hooks`: `Access`, `Admin`, `Instructor`, `Owner`, `Student`
 
 Regla de dependencias:
 - `domain` no depende de otras capas compartidas.
 - `application` depende de `domain`.
 - `infrastructure` depende de `domain` y satisface contratos usados por `application`.
 - `hooks` depende de `application` y `domain`.
-- `apps/*` consumen hooks y casos de uso.
-- En web, la composición/wiring hacia `infrastructure` debe quedar encapsulada en `apps/web/src/lib` y no filtrarse a rutas o componentes.
+- `apps/*` deben preferir hooks como boundary de consumo; en web, la UI no debe importar `application` ni `infrastructure` directamente.
+- En web, la composición/wiring hacia `infrastructure` debe quedar encapsulada en `apps/web/src/lib` y entregarse a la UI a través de `apps/web/src/components/RepasoProviders.tsx`.
+- No coloques lógica de negocio role-aware en `shared`; `shared` debe quedar limitado a utilidades y tipos primitivos/base.
+- Si agregas un slice nuevo por rol o feature, refléjalo consistentemente en `domain`, `application`, `infrastructure` y `hooks`.
+
+## 🔐 Access Model Actual
+- `CurrentAccess` es el modelo compartido de acceso autenticado.
+- Incluye `isStudent`, `isInstructor`, `isAdmin`, `isOwner` y `hasActiveMembership`.
+- La resolución del acceso actual fluye así:
+  - `@repaso/infrastructure.Access.createSupabaseAccessRepository`
+  - `@repaso/application.Access.resolveCurrentAccess`
+  - `@repaso/hooks.Access.CurrentAccessProvider` / `@repaso/hooks.Access.useCurrentAccess`
+- En web, los predicados de guardia de áreas viven en `apps/web/src/lib/role-authorization.ts` para mantener los layouts consistentes y listos para futuros cambios de jerarquía.
+- `apps/web/src/components/RepasoProviders.tsx` es el punto de inyección de dependencias compartidas para acceso y hooks del slice `Student`.
 
 ## 🗃 Datos y Migraciones
 - Cada nueva feature que requiere datos: agregar migración SQL en `infra/database/supabase/migrations/` con nombre timestamp + descripción.
@@ -185,8 +220,9 @@ Incluye cambios destructivos solo cuando sean realmente necesarios y explícitos
 ```text
 "Crear migración para tabla 'topics' con campos id, exam_id, nombre, slug, weight"
 "Agregar caso de uso en packages/application para cargar el dashboard del estudiante"
-"Generar hook genérico de acceso/rol que exponga isAdmin/isInstructor/isStudent y hasActiveMembership"
+"Generar hook/proveedor de acceso compartido que consuma @repaso/application.Access y exponga CurrentAccess"
 "Mover una query Supabase desde una página de Next.js a packages/infrastructure y conectarla desde hooks"
+"Centralizar autorización de layouts web en apps/web/src/lib/role-authorization.ts"
 ```
 
 ## ⚠️ Pitfalls a Evitar
@@ -197,6 +233,7 @@ Incluye cambios destructivos solo cuando sean realmente necesarios y explícitos
 - Contradecir el esquema SQL o la documentación de `docs/data-model.md`.
 - Saltarse la separación por capas y volver a introducir un paquete “sdk” monolítico.
 - Saltarse el boundary de `apps/web/src/lib/repaso-dependencies.ts` e importar infraestructura directo desde UI web.
+- Saltarse `apps/web/src/components/RepasoProviders.tsx` y volver a pasar repositorios/dependencias manualmente por páginas o componentes.
 - Colocar lógica de negocio dentro de hooks cuando debería vivir en `application`.
 
 ## ✅ Principios
