@@ -1,4 +1,5 @@
 import RoleGuardLayout from "@/components/RoleGuardLayout";
+import { canAccessAdminArea } from "@/lib/role-authorization";
 
 export default function AdminLayout({
   children,
@@ -7,7 +8,7 @@ export default function AdminLayout({
 }>) {
   return (
     <RoleGuardLayout
-      authorize={(access) => access.isAuthenticated && access.role === "admin"}
+      authorize={canAccessAdminArea}
       areaLabel="Admin"
     >
       {children}

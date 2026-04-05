@@ -1,4 +1,5 @@
 import RoleGuardLayout from "@/components/RoleGuardLayout";
+import { canAccessOwnerArea } from "@/lib/role-authorization";
 
 export default function OwnerLayout({
   children,
@@ -7,7 +8,7 @@ export default function OwnerLayout({
 }>) {
   return (
     <RoleGuardLayout
-      authorize={(access) => access.isAuthenticated && access.role === "owner"}
+      authorize={canAccessOwnerArea}
       areaLabel="Owner"
     >
       {children}
