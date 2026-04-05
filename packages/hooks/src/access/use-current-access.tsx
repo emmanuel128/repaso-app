@@ -16,6 +16,7 @@ const DEFAULT_ACCESS: DomainShared.CurrentAccess = {
   isStudent: false,
   isInstructor: false,
   isAdmin: false,
+  isOwner: false,
   error: null,
 };
 

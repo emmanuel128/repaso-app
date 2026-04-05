@@ -1,20 +1,13 @@
-import type { Shared as DomainShared } from "@repaso/domain";
-
-function hasRequiredRole(
-  access: DomainShared.CurrentAccess,
-  role: DomainShared.RoleType
-) {
-  return access.isAuthenticated && access.role === role;
-}
+import { Access as DomainAccess, type Shared as DomainShared } from "@repaso/domain";
 
 export function canAccessAdminArea(access: DomainShared.CurrentAccess) {
-  return hasRequiredRole(access, "admin");
+  return DomainAccess.canEnterAdminArea(access);
 }
 
 export function canAccessInstructorArea(access: DomainShared.CurrentAccess) {
-  return hasRequiredRole(access, "instructor");
+  return DomainAccess.canEnterInstructorArea(access);
 }
 
 export function canAccessOwnerArea(access: DomainShared.CurrentAccess) {
-  return hasRequiredRole(access, "owner");
+  return DomainAccess.canEnterOwnerArea(access);
 }

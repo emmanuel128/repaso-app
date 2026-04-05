@@ -24,6 +24,7 @@ function buildAccessState(
     isStudent: DomainAccess.isStudentRole(role),
     isInstructor: DomainAccess.isInstructorRole(role),
     isAdmin: DomainAccess.isAdminRole(role),
+    isOwner: DomainAccess.isOwnerRole(role),
     error,
   };
 }

@@ -32,6 +32,7 @@ export interface CurrentAccess {
   isStudent: boolean;
   isInstructor: boolean;
   isAdmin: boolean;
+  isOwner: boolean;
   error: string | null;
 }
 
