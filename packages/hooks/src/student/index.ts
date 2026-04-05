@@ -1,6 +1,8 @@
-export { useStudentAreasWithTopics } from "./use-student-areas-with-topics";
-export { useStudentAttemptReview } from "./use-student-attempt-review";
-export { useStudentDashboard } from "./use-student-dashboard";
-export { useStudentGlobalSearch } from "./use-student-global-search";
-export { useStudentPracticeContent } from "./use-student-practice-content";
-export { useStudentTopicDetail } from "./use-student-topic-detail";
+export { StudentDependenciesProvider } from "./dependencies";
+export { useAreasWithTopics } from "./use-student-areas-with-topics";
+export { useAttemptReview } from "./use-student-attempt-review";
+export { useDashboard } from "./use-student-dashboard";
+export { useGlobalSearch } from "./use-student-global-search";
+export { usePracticeContent } from "./use-student-practice-content";
+export { usePracticeMutations } from "./use-student-practice-mutations";
+export { useTopicDetail } from "./use-student-topic-detail";

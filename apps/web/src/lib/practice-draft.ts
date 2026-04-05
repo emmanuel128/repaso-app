@@ -1,12 +1,12 @@
 "use client";
 
-import type { PracticeQuestion } from "@repaso/domain";
+import type { Student as DomainStudent } from "@repaso/domain";
 
 export interface PracticeDraft {
   topicId: string;
   topicSlug: string;
   topicName: string;
-  questions: PracticeQuestion[];
+  questions: DomainStudent.PracticeQuestion[];
   answers: Record<string, string>;
   flaggedQuestionIds: string[];
   updatedAt: string;
@@ -53,7 +53,7 @@ export function clearPracticeDraft(userId: string, topicSlug: string): void {
 
 export function sanitizePracticeDraft(
   draft: PracticeDraft | null,
-  questions: PracticeQuestion[]
+  questions: DomainStudent.PracticeQuestion[]
 ): Pick<PracticeDraft, "answers" | "flaggedQuestionIds"> {
   const validQuestionIds = new Set(questions.map((question) => question.question_id));
   const answers = Object.fromEntries(

@@ -1,4 +1,3 @@
-import { canEnterInstructorArea } from "@repaso/domain";
 import RoleGuardLayout from "@/components/RoleGuardLayout";
 
 export default function InstructorLayout({
@@ -7,7 +6,10 @@ export default function InstructorLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <RoleGuardLayout authorize={canEnterInstructorArea} areaLabel="Instructor">
+    <RoleGuardLayout
+      authorize={(access) => access.isAuthenticated && access.role === "instructor"}
+      areaLabel="Instructor"
+    >
       {children}
     </RoleGuardLayout>
   );

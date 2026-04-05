@@ -3,22 +3,21 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useResolvedCurrentAccess, useStudentAttemptReview } from "@repaso/hooks";
+import { Access, Student } from "@repaso/hooks";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
-import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 export default function AttemptReviewPage() {
   const params = useParams<{ attemptId: string }>();
   const attemptId = typeof params.attemptId === "string" ? params.attemptId : null;
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const allowed = access.isStudent && access.hasActiveMembership;
   const accessError = allowed
     ? null
     : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
-  const { review, loading, error } = useStudentAttemptReview(browserStudentRepository, allowed ? attemptId : null);
+  const { review, loading, error } = Student.useAttemptReview(allowed ? attemptId : null);
 
   const score = useMemo(() => review.reduce((sum, item) => sum + item.score, 0), [review]);
   const maxScore = review.length;

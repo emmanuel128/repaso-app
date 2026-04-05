@@ -1,4 +1,3 @@
-import { canEnterAdminArea } from "@repaso/domain";
 import RoleGuardLayout from "@/components/RoleGuardLayout";
 
 export default function AdminLayout({
@@ -7,7 +6,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <RoleGuardLayout authorize={canEnterAdminArea} areaLabel="Admin">
+    <RoleGuardLayout
+      authorize={(access) => access.isAuthenticated && access.role === "admin"}
+      areaLabel="Admin"
+    >
       {children}
     </RoleGuardLayout>
   );

@@ -28,7 +28,7 @@ export function CurrentAccessProvider({
   dependencies: ApplicationAccess.CurrentAccessDependencies;
   children: ReactNode;
 }) {
-  const access = useResolvedCurrentAccess(dependencies);
+  const access = useCurrentAccessState(dependencies);
   return <CurrentAccessContext.Provider value={access}>{children}</CurrentAccessContext.Provider>;
 }
 
@@ -36,7 +36,7 @@ export function useCurrentAccess(): DomainShared.CurrentAccess {
   return useContext(CurrentAccessContext);
 }
 
-export function useResolvedCurrentAccess(
+function useCurrentAccessState(
   dependencies: ApplicationAccess.CurrentAccessDependencies
 ): DomainShared.CurrentAccess {
   const [state, setState] = useState<DomainShared.CurrentAccess>(DEFAULT_ACCESS);

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Shared as DomainShared } from '@repaso/domain';
 import { createAuthClient } from '@/lib/supabase';
-import type { SignUpCredentials } from '@repaso/domain';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 export default function SignUpPage() {
-    const [credentials, setCredentials] = useState<SignUpCredentials>({
+    const [credentials, setCredentials] = useState<DomainShared.SignUpCredentials>({
         firstName: '',
         lastName: '',
         email: '',

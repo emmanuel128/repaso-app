@@ -2,16 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useResolvedCurrentAccess, useStudentDashboard } from "@repaso/hooks";
+import { Access, Student } from "@repaso/hooks";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
 import { createAuthClient } from "@/lib/supabase";
-import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const user = access.user;
   const membership = access.membership;
@@ -19,7 +18,7 @@ export default function StudentDashboard() {
   const accessError = allowed
     ? null
     : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
-  const { snapshot, loading: loadingSnapshot, error } = useStudentDashboard(browserStudentRepository);
+  const { snapshot, loading: loadingSnapshot, error } = Student.useDashboard();
 
   async function handleSignOut() {
     const auth = createAuthClient();

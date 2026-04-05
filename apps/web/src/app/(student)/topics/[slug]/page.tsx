@@ -2,23 +2,22 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useResolvedCurrentAccess, useStudentTopicDetail } from "@repaso/hooks";
+import { Access, Student } from "@repaso/hooks";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import MarkdownContent from "@/components/MarkdownContent";
 import PageLoader from "@/components/PageLoader";
-import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 export default function TopicDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = typeof params.slug === "string" ? params.slug : null;
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const allowed = access.isStudent && access.hasActiveMembership;
   const accessError = allowed
     ? null
     : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
-  const { detail, loading, error } = useStudentTopicDetail(browserStudentRepository, allowed ? slug : null);
+  const { detail, loading, error } = Student.useTopicDetail(allowed ? slug : null);
 
   if (!allowed) {
     if (accessLoading || !slug) {

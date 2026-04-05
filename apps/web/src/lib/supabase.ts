@@ -1,16 +1,16 @@
-import { createRepasoAuth, makeSupabaseClient } from "@repaso/infrastructure";
+import { Shared as InfrastructureShared } from "@repaso/infrastructure";
 
 export const supabaseServer = () =>
-    makeSupabaseClient(
+    InfrastructureShared.makeSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     );
 
-let browserClient: ReturnType<typeof makeSupabaseClient> | null = null;
+let browserClient: ReturnType<typeof InfrastructureShared.makeSupabaseClient> | null = null;
 
 export const supabaseBrowser = () => {
     if (!browserClient) {
-        browserClient = makeSupabaseClient(
+        browserClient = InfrastructureShared.makeSupabaseClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
@@ -22,5 +22,5 @@ export const supabaseBrowser = () => {
 // Create auth instance for browser
 export const createAuthClient = () => {
     const client = supabaseBrowser();
-    return createRepasoAuth(client);
+    return InfrastructureShared.createRepasoAuth(client);
 };

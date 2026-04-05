@@ -3,11 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useResolvedCurrentAccess, useStudentGlobalSearch } from "@repaso/hooks";
+import { Access, Student } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import AppHeader from "@/components/AppHeader";
 import PageLoader from "@/components/PageLoader";
-import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 const MIN_QUERY_LENGTH = 2;
 
@@ -15,7 +14,7 @@ export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const allowed = access.isStudent && access.hasActiveMembership;
   const accessError = allowed
@@ -32,11 +31,7 @@ export default function SearchPage() {
     results,
     loading,
     error,
-  } = useStudentGlobalSearch(
-    browserStudentRepository,
-    trimmedQuery,
-    allowed && !accessLoading && trimmedQuery.length >= MIN_QUERY_LENGTH
-  );
+  } = Student.useGlobalSearch(trimmedQuery, allowed && !accessLoading && trimmedQuery.length >= MIN_QUERY_LENGTH);
 
   const totalResults = useMemo(
     () => results.reduce((sum, group) => sum + group.results.length, 0),

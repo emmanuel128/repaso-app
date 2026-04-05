@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { Student as ApplicationStudent } from "@repaso/application";
 import { Student as DomainStudent } from "@repaso/domain";
+import { useStudentRepository } from "./dependencies";
 
-export function useStudentAreasWithTopics(repository: ApplicationStudent.StudentRepository) {
+export function useAreasWithTopics() {
+  const repository = useStudentRepository();
   const [areas, setAreas] = useState<DomainStudent.AreaWithTopics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

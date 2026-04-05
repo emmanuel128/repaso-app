@@ -2,14 +2,13 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { CurrentAccess } from "@repaso/domain";
-import { useResolvedCurrentAccess } from "@repaso/hooks";
+import type { Shared as DomainShared } from "@repaso/domain";
+import { Access } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
-import { currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 interface RoleGuardLayoutProps {
-  authorize: (access: CurrentAccess) => boolean;
+  authorize: (access: DomainShared.CurrentAccess) => boolean;
   areaLabel: string;
   children: ReactNode;
 }
@@ -20,7 +19,7 @@ export default function RoleGuardLayout({
   children,
 }: RoleGuardLayoutProps) {
   const router = useRouter();
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const isAuthorized = authorize(access);
 
   useEffect(() => {

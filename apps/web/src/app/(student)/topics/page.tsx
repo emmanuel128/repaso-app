@@ -2,22 +2,21 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useResolvedCurrentAccess, useStudentAreasWithTopics, useStudentGlobalSearch } from "@repaso/hooks";
+import { Access, Student } from "@repaso/hooks";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
-import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 const MIN_QUERY_LENGTH = 2;
 
 export default function TopicsPage() {
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const allowed = access.isStudent && access.hasActiveMembership;
   const accessError = allowed
     ? null
     : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
-  const { areas, loading, error } = useStudentAreasWithTopics(browserStudentRepository);
+  const { areas, loading, error } = Student.useAreasWithTopics();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -37,11 +36,7 @@ export default function TopicsPage() {
     results: searchResults,
     loading: searchLoading,
     error: searchError,
-  } = useStudentGlobalSearch(
-    browserStudentRepository,
-    debouncedQuery,
-    allowed && !accessLoading && hasActiveSearch
-  );
+  } = Student.useGlobalSearch(debouncedQuery, allowed && !accessLoading && hasActiveSearch);
   const totalResults = useMemo(
     () => searchResults.reduce((sum, group) => sum + group.results.length, 0),
     [searchResults]

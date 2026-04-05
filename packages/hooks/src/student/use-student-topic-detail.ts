@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { Student as ApplicationStudent } from "@repaso/application";
 import { Student as DomainStudent } from "@repaso/domain";
+import { useStudentRepository } from "./dependencies";
 
-export function useStudentTopicDetail(
-  repository: ApplicationStudent.StudentRepository,
-  slug: string | null
-) {
+export function useTopicDetail(slug: string | null) {
+  const repository = useStudentRepository();
   const [detail, setDetail] = useState<DomainStudent.TopicDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

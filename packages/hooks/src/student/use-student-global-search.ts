@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { Student as ApplicationStudent } from "@repaso/application";
 import { Student as DomainStudent } from "@repaso/domain";
+import { useStudentRepository } from "./dependencies";
 
-export function useStudentGlobalSearch(
-  repository: ApplicationStudent.StudentRepository,
-  query: string,
-  enabled = true
-) {
+export function useGlobalSearch(query: string, enabled = true) {
+  const repository = useStudentRepository();
   const [results, setResults] = useState<DomainStudent.GlobalSearchGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

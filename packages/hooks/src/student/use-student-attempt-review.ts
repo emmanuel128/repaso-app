@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { Student as ApplicationStudent } from "@repaso/application";
 import { Student as DomainStudent } from "@repaso/domain";
+import { useStudentRepository } from "./dependencies";
 
-export function useStudentAttemptReview(
-  repository: ApplicationStudent.StudentRepository,
-  attemptId: string | null
-) {
+export function useAttemptReview(attemptId: string | null) {
+  const repository = useStudentRepository();
   const [review, setReview] = useState<DomainStudent.AttemptReviewQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

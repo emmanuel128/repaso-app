@@ -1,16 +1,15 @@
 "use client";
 
-import type { CurrentAccessDependencies } from "@repaso/application";
-import type { StudentRepository } from "@repaso/application";
-import { createSupabaseAccessRepository, createSupabaseStudentRepository } from "@repaso/infrastructure";
+import type { Access, Student } from "@repaso/application";
+import { Access as InfrastructureAccess, Student as InfrastructureStudent } from "@repaso/infrastructure";
 import { supabaseBrowser, createAuthClient } from "@/lib/supabase";
 
 const browserClient = supabaseBrowser();
 
-export const browserStudentRepository: StudentRepository =
-  createSupabaseStudentRepository(browserClient);
+export const browserStudentRepository: Student.StudentRepository =
+  InfrastructureStudent.createSupabaseStudentRepository(browserClient);
 
-export const currentAccessDependencies: CurrentAccessDependencies = {
+export const currentAccessDependencies: Access.CurrentAccessDependencies = {
   authGateway: createAuthClient(),
-  accessRepository: createSupabaseAccessRepository(browserClient),
+  accessRepository: InfrastructureAccess.createSupabaseAccessRepository(browserClient),
 };

@@ -2,11 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useResolvedCurrentAccess } from "@repaso/hooks";
+import { Access } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
 import StudentDashboard from "@/app/(student)/dashboard/student-dashboard";
-import { currentAccessDependencies } from "@/lib/repaso-dependencies";
 import { toUserRole, type UserRole } from "@/lib/user-role";
 
 const REDIRECT_BY_ROLE: Record<Exclude<UserRole, "Student">, string> = {
@@ -17,7 +16,7 @@ const REDIRECT_BY_ROLE: Record<Exclude<UserRole, "Student">, string> = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
 
   const userRole = toUserRole(access.role);
 

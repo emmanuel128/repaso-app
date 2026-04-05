@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { Student as ApplicationStudent } from "@repaso/application";
 import { Student as DomainStudent } from "@repaso/domain";
+import { useStudentRepository } from "./dependencies";
 
-export function useStudentDashboard(repository: ApplicationStudent.StudentRepository) {
+export function useDashboard() {
+  const repository = useStudentRepository();
   const [snapshot, setSnapshot] = useState<DomainStudent.DashboardSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

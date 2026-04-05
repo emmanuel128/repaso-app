@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { updateStudentQuestionFlag } from "@repaso/application";
-import { useResolvedCurrentAccess, useStudentPracticeContent } from "@repaso/hooks";
+import { Access, Student } from "@repaso/hooks";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "@/components/AppHeader";
 import AccessNotice from "@/components/AccessNotice";
 import FlagToggleButton from "@/components/FlagToggleButton";
 import PageLoader from "@/components/PageLoader";
 import { loadPracticeDraft, sanitizePracticeDraft, savePracticeDraft } from "@/lib/practice-draft";
-import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 type AnswerMap = Record<string, string>;
 
@@ -19,7 +17,7 @@ export default function PracticePage() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
   const slug = typeof params.slug === "string" ? params.slug : null;
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const user = access.user;
   const membership = access.membership;
@@ -27,11 +25,11 @@ export default function PracticePage() {
   const accessError = allowed
     ? null
     : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
-  const { content, loading, error: contentError } = useStudentPracticeContent(
-    browserStudentRepository,
+  const { content, loading, error: contentError } = Student.usePracticeContent(
     allowed ? slug : null,
     QUESTION_LIMIT
   );
+  const { updateQuestionFlag } = Student.usePracticeMutations();
   const detail = content?.detail ?? null;
   const questions = useMemo(() => content?.questions ?? [], [content?.questions]);
   const [answers, setAnswers] = useState<AnswerMap>({});
@@ -96,7 +94,7 @@ export default function PracticePage() {
     setError(null);
 
     try {
-      await updateStudentQuestionFlag(browserStudentRepository, {
+      await updateQuestionFlag({
         tenantId: membership.tenant_id,
         userId: user.id,
         questionId,

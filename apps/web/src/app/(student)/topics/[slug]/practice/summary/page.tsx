@@ -1,22 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { startStudentPracticeSession, submitStudentPracticeAttempt } from "@repaso/application";
-import type { SelectedAnswer } from "@repaso/domain";
-import { useResolvedCurrentAccess } from "@repaso/hooks";
+import type { Student as DomainStudent } from "@repaso/domain";
+import { Access, Student } from "@repaso/hooks";
 import { useParams, useRouter } from "next/navigation";
 import type { PracticeDraft } from "@/lib/practice-draft";
 import AccessNotice from "@/components/AccessNotice";
 import AppHeader from "@/components/AppHeader";
 import PageLoader from "@/components/PageLoader";
 import { clearPracticeDraft, loadPracticeDraft } from "@/lib/practice-draft";
-import { browserStudentRepository, currentAccessDependencies } from "@/lib/repaso-dependencies";
 
 export default function PracticeSummaryPage() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
   const slug = typeof params.slug === "string" ? params.slug : null;
-  const access = useResolvedCurrentAccess(currentAccessDependencies);
+  const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const user = access.user;
   const membership = access.membership;
@@ -26,6 +24,7 @@ export default function PracticeSummaryPage() {
     : access.error ?? "Tu membresía no tiene acceso activo al contenido de estudio.";
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { submitPracticeAttempt } = Student.usePracticeMutations();
 
   const draft = useMemo<PracticeDraft | null>(() => {
     if (!allowed || !slug || !user) {
@@ -67,26 +66,21 @@ export default function PracticeSummaryPage() {
     setError(null);
 
     try {
-      const session = await startStudentPracticeSession(browserStudentRepository, {
+      const payload: DomainStudent.SelectedAnswer[] = draft.questions.map((question) => ({
+        question_id: question.question_id,
+        selected_option_ids: draft.answers[question.question_id] ? [draft.answers[question.question_id]] : [],
+      }));
+
+      const result = await submitPracticeAttempt({
         tenantId: membership.tenant_id,
         userId: user.id,
         topicId: draft.topicId,
+        answers: payload,
         config: {
           question_count: draft.questions.length,
           source: "student_mvp",
           summary_reviewed: true,
         },
-      });
-
-      const payload: SelectedAnswer[] = draft.questions.map((question) => ({
-        question_id: question.question_id,
-        selected_option_ids: draft.answers[question.question_id] ? [draft.answers[question.question_id]] : [],
-      }));
-
-      const result = await submitStudentPracticeAttempt(browserStudentRepository, {
-        practiceSessionId: session.id,
-        topicId: draft.topicId,
-        answers: payload,
       });
 
       clearPracticeDraft(user.id, draft.topicSlug);
