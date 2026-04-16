@@ -1,1 +1,5 @@
-export type { InstructorDashboardPlaceholder } from "./types";
+export type {
+  AttentionTopicRow,
+  DashboardSnapshot,
+  RecentActivityRow,
+} from "./types";

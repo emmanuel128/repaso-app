@@ -3,3 +3,8 @@ export * as Dashboard from "./dashboard";
 export * as IndividualDiagnosis from "./individual-diagnosis";
 export * as QuestionAnalysis from "./question-analysis";
 export * as StudentManagement from "./student-management";
+export type {
+  AttentionTopicRow,
+  DashboardSnapshot,
+  RecentActivityRow,
+} from "./dashboard";
