@@ -30,6 +30,10 @@ Current visible routes:
 - `/owner`
 - `/admin`
 - `/instructor`
+- `/instructor/cohort-monitoring`
+- `/instructor/individual-diagnosis`
+- `/instructor/student-management`
+- `/instructor/question-analysis`
 
 ## Commands
 Run commands from the repository root unless there is a reason to scope them locally.
@@ -66,6 +70,7 @@ Run commands from the repository root unless there is a reason to scope them loc
 - This project already uses Tailwind and Next.js defaults; extend that stack instead of replacing it
 - Preserve responsive behavior across desktop and mobile widths
 - Reuse existing route/layout patterns before creating new top-level structures
+- Preserve the flat instructor feature scaffold under `src/app/(instructor)`
 
 ## When Changing This App
 
@@ -74,3 +79,4 @@ Run commands from the repository root unless there is a reason to scope them loc
 - If adding shared business logic, prefer moving it into `packages/*` instead of duplicating it in web
 - If future mobile work needs the same behavior, keep platform-neutral logic in shared packages and keep web-specific assembly inside `src/lib`
 - If a new role-gated surface is added, extend `src/lib/role-authorization.ts` and keep `RoleGuardLayout` call sites declarative
+- Instructor pages are placeholders today; do not imply analytics or engagement metrics exist until the shared contracts and backend support land
