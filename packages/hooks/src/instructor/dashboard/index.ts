@@ -1,1 +1,1 @@
-export type { InstructorDashboardHooksPlaceholder } from "./types";
+export type { UseInstructorDashboardResult } from "./types";
