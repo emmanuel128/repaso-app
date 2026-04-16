@@ -1,1 +1,1 @@
-export type { InstructorDashboardRepositoryPlaceholder } from "./types";
+export type { InstructorDashboardRepositorySnapshot } from "./types";
