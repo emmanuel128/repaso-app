@@ -1,5 +1,4 @@
-export interface InstructorDashboardUseCasePlaceholder {
-  readonly scope: "instructor";
-  readonly feature: "dashboard";
-  readonly status: "placeholder";
-}
+import type { Instructor as DomainInstructor } from "@repaso/domain";
+
+export type InstructorDashboardUseCaseResult =
+  DomainInstructor.DashboardSnapshot;
