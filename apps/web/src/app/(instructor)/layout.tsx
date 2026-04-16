@@ -1,5 +1,4 @@
 import RoleGuardLayout from "@/components/RoleGuardLayout";
-import { canAccessInstructorArea } from "@/lib/role-authorization";
 
 export default function InstructorLayout({
   children,
@@ -7,10 +6,7 @@ export default function InstructorLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <RoleGuardLayout
-      authorize={canAccessInstructorArea}
-      areaLabel="Instructor"
-    >
+    <RoleGuardLayout area="instructor" areaLabel="Instructor">
       {children}
     </RoleGuardLayout>
   );
