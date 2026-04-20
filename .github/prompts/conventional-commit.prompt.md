@@ -9,9 +9,11 @@ Analyze the current git changes in this repository and produce one or more conve
 
 ## Steps
 
-1. Run `git diff --cached` to inspect staged changes. If nothing is staged, run `git diff` for unstaged changes. Also run `git status` for the full picture.
-2. Group logically related changes together. Each group should become one commit.
-3. For each group, output a commit message using the format below.
+1. Run `git diff --cached` to inspect staged changes.
+2. Run `git diff` to inspect unstaged changes.
+3. Run `git status --short` as a summary view of the working tree. Identify untracked files (`??`) and inspect the contents of each relevant untracked file (for example, `cat <path>`) before grouping commits.
+4. Group logically related changes together. Each group should become one commit.
+5. For each group, output a commit message using the format below.
 
 ## Commit Message Format
 
