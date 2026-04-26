@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Access } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
-import StudentDashboard from "@/app/(student)/dashboard/student-dashboard";
 import { toUserRole, type UserRole } from "@/lib/user-role";
 
-const REDIRECT_BY_ROLE: Record<Exclude<UserRole, "Student">, string> = {
+const REDIRECT_BY_ROLE: Record<UserRole, string> = {
+  Student: "/student",
   Owner: "/owner",
   Admin: "/admin",
   Instructor: "/instructor",
@@ -21,7 +21,7 @@ export default function DashboardPage() {
   const userRole = toUserRole(access.role);
 
   useEffect(() => {
-    if (access.loading || !access.isAuthenticated || !userRole || userRole === "Student") {
+    if (access.loading || !access.isAuthenticated || !userRole) {
       return;
     }
 
@@ -52,7 +52,6 @@ export default function DashboardPage() {
 
   switch (userRole) {
     case "Student":
-      return <StudentDashboard />;
     case "Owner":
     case "Admin":
     case "Instructor":

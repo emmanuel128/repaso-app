@@ -95,7 +95,7 @@ export default function StudentDashboard() {
                 <h3 className="text-xl font-semibold text-foreground">Progreso por tema</h3>
                 <p className="text-text-secondary">Tu desempeño reciente según los intentos ya corregidos.</p>
               </div>
-              <Link href="/topics" className="text-sm font-medium text-primary hover:text-secondary transition-colors">
+              <Link href="/student/topics" className="text-sm font-medium text-primary hover:text-secondary transition-colors">
                 Ver todos los temas
               </Link>
             </div>
@@ -116,7 +116,7 @@ export default function StudentDashboard() {
                           </p>
                         </div>
                         {row.topics?.slug ? (
-                          <Link href={`/topics/${row.topics.slug}`} className="text-sm text-primary hover:text-secondary transition-colors">
+                          <Link href={`/student/topics/${row.topics.slug}`} className="text-sm text-primary hover:text-secondary transition-colors">
                             Abrir tema
                           </Link>
                         ) : null}
@@ -157,11 +157,11 @@ export default function StudentDashboard() {
                         Resultado: {percentage}% · {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleString("es-PR") : "Sin fecha"}
                       </p>
                       <div className="flex items-center gap-4">
-                        <Link href={`/attempts/${attempt.id}`} className="text-sm font-medium text-primary hover:text-secondary transition-colors">
+                        <Link href={`/student/attempts/${attempt.id}`} className="text-sm font-medium text-primary hover:text-secondary transition-colors">
                           Revisar respuestas
                         </Link>
                         {attempt.practice_sessions?.topics?.slug ? (
-                          <Link href={`/topics/${attempt.practice_sessions.topics.slug}/practice`} className="text-sm text-text-secondary hover:text-foreground transition-colors">
+                          <Link href={`/student/topics/${attempt.practice_sessions.topics.slug}/practice`} className="text-sm text-text-secondary hover:text-foreground transition-colors">
                             Repetir tema
                           </Link>
                         ) : null}
@@ -184,7 +184,7 @@ export default function StudentDashboard() {
             <p className="text-text-secondary mb-5">
               Entra a un tema para repasar notas, ver casos clínicos y resolver preguntas con retroalimentación inmediata.
             </p>
-            <Link href="/topics" className="inline-flex items-center justify-center rounded-full bg-primary hover:bg-secondary text-white px-5 py-3 font-medium transition-colors">
+            <Link href="/student/topics" className="inline-flex items-center justify-center rounded-full bg-primary hover:bg-secondary text-white px-5 py-3 font-medium transition-colors">
               Explorar temas
             </Link>
           </article>
