@@ -27,6 +27,7 @@ Root namespaces:
 Current responsibilities:
 
 - `Access`: centralized access policy and role predicates
+- `Instructor`: scaffolded instructor feature namespaces for future analytics and management flows
 - `Shared`: primitive/base types such as auth state, membership, raw role types
 - `Student`: student-facing domain models
 
@@ -47,6 +48,7 @@ Root namespaces:
 Current responsibilities:
 
 - `Access`: orchestration for current-access resolution
+- `Instructor`: scaffolded instructor use-case namespaces and placeholder contracts
 - `Student`: student use cases and repository contracts
 
 Important rule:
@@ -67,6 +69,7 @@ Root namespaces:
 Current responsibilities:
 
 - `Access`: neutral persistence adapters for current access
+- `Instructor`: scaffolded instructor repository namespaces reserved for future analytics/data adapters
 - `Shared`: Supabase auth/client primitives
 - `Student`: student repository implementation
 
@@ -87,6 +90,7 @@ Root namespaces:
 Current responsibilities:
 
 - `Access`: `CurrentAccessProvider` and `useCurrentAccess`
+- `Instructor`: scaffolded instructor hook namespaces reserved for future UI integration
 - `Student`: student hooks, repository dependency context, and student mutations
 
 Important rule:
@@ -134,6 +138,20 @@ The student hooks namespace currently exposes:
 - `usePracticeMutations`
 - `useTopicDetail`
 
+### Instructor scaffold
+
+Instructor now has a scaffolded vertical slice shape across all shared packages.
+
+Current instructor feature namespaces:
+
+- `Dashboard`
+- `CohortMonitoring`
+- `IndividualDiagnosis`
+- `StudentManagement`
+- `QuestionAnalysis`
+
+These namespaces are placeholders only. They establish stable module boundaries without claiming implemented instructor analytics.
+
 ## Rules For Future Changes
 
 - Import shared packages through their public namespaces, never via package-internal source paths.
@@ -142,7 +160,7 @@ The student hooks namespace currently exposes:
 - Keep auth/data adapters in `@repaso/infrastructure`, not in apps.
 - Keep role-specific business logic out of `shared`.
 - If a new role slice is introduced, add it consistently across `domain`, `application`, `infrastructure`, and `hooks`.
-- Placeholder `Admin`, `Instructor`, and `Owner` namespaces exist to keep the package API stable until those slices gain real behavior.
+- `Instructor` now has scaffolded feature namespaces; `Admin` and `Owner` remain placeholder slices until they gain real behavior.
 
 ## Fast Reference
 

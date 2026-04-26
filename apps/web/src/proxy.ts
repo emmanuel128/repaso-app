@@ -6,5 +6,5 @@ export function proxy() {
 }
 
 export const config = {
-  matcher: ['/app/:path*']
+  matcher: ['/student/:path*', '/dashboard']
 };
