@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Access, Student } from "@repaso/hooks";
+import { Access, Instructor, Student } from "@repaso/hooks";
 import {
+  browserInstructorRepository,
   browserStudentRepository,
   currentAccessDependencies,
 } from "@/lib/repaso-dependencies";
@@ -10,9 +11,11 @@ import {
 export default function RepasoProviders({ children }: { children: ReactNode }) {
   return (
     <Access.CurrentAccessProvider dependencies={currentAccessDependencies}>
-      <Student.StudentDependenciesProvider repository={browserStudentRepository}>
-        {children}
-      </Student.StudentDependenciesProvider>
+      <Instructor.InstructorDependenciesProvider repository={browserInstructorRepository}>
+        <Student.StudentDependenciesProvider repository={browserStudentRepository}>
+          {children}
+        </Student.StudentDependenciesProvider>
+      </Instructor.InstructorDependenciesProvider>
     </Access.CurrentAccessProvider>
   );
 }

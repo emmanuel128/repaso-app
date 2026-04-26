@@ -2,25 +2,43 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { Shared as DomainShared } from "@repaso/domain";
+import { Access as DomainAccess, type Shared as DomainShared } from "@repaso/domain";
 import { Access } from "@repaso/hooks";
 import AccessNotice from "@/components/AccessNotice";
 import PageLoader from "@/components/PageLoader";
 
+type GuardArea = "admin" | "instructor" | "owner";
+
 interface RoleGuardLayoutProps {
-  authorize: (access: DomainShared.CurrentAccess) => boolean;
+  area: GuardArea;
   areaLabel: string;
   children: ReactNode;
 }
 
+function canAccessArea(
+  area: GuardArea,
+  access: DomainShared.CurrentAccess
+): boolean {
+  switch (area) {
+    case "admin":
+      return DomainAccess.canEnterAdminArea(access);
+    case "instructor":
+      return DomainAccess.canEnterInstructorArea(access);
+    case "owner":
+      return DomainAccess.canEnterOwnerArea(access);
+    default:
+      return false;
+  }
+}
+
 export default function RoleGuardLayout({
-  authorize,
+  area,
   areaLabel,
   children,
 }: RoleGuardLayoutProps) {
   const router = useRouter();
   const access = Access.useCurrentAccess();
-  const isAuthorized = authorize(access);
+  const isAuthorized = canAccessArea(area, access);
 
   useEffect(() => {
     if (access.loading) {

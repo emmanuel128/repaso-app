@@ -1,6 +1,8 @@
 # Repaso – AI Agent Instructions
 
-Whitelabel educational exam platform. Backend: Supabase (Auth, Postgres, Edge Functions). Web: Next.js 16 App Router. Mobile: Expo (no scaffold yet).
+**GitHub Repository:** [emmanuel128/repaso-app](https://github.com/emmanuel128/repaso-app)
+
+Whitelabel educational exam platform. Backend: Supabase (Auth, Postgres, Edge Functions). Web: Next.js 16 App Router, React 19, Tailwind CSS v4. Mobile: Expo (no scaffold yet). Node.js engine: `24.x`.
 
 **Detailed area guides:** [apps/web/agent.md](../../apps/web/agent.md) · [packages/agent.md](../../packages/agent.md) · [infra/database/supabase/agent.md](../../infra/database/supabase/agent.md)
 
@@ -44,7 +46,9 @@ Whitelabel educational exam platform. Backend: Supabase (Auth, Postgres, Edge Fu
 npm install              # install all workspaces
 npm run dev:web          # web dev server
 npm run db:start         # start local Supabase
+npm run db:stop          # stop local Supabase
 npm run db:migrate       # apply pending migrations
+npm run db:seed          # run seeds without full reset
 npm run db:reset         # reset local DB + re-seed
 npm run typecheck        # typecheck all workspaces
 npm run lint:all         # lint all workspaces
