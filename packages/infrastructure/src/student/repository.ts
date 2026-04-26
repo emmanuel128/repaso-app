@@ -225,7 +225,7 @@ export function createSupabaseStudentRepository(
           category: "topics" as const,
           title: topic.name as string,
           snippet: buildSnippet(buildSnippetText(topic.name as string, topic.description as string | null | undefined), trimmedQuery),
-          href: `/topics/${topic.slug as string}`,
+          href: `/student/topics/${topic.slug as string}`,
           topic_slug: topic.slug as string,
         })),
         clinical_cases: (casesResult.data ?? [])
@@ -242,7 +242,7 @@ export function createSupabaseStudentRepository(
               buildSnippetText(caseItem.title as string, caseItem.body_md as string | null | undefined),
               trimmedQuery
             ),
-            href: `/topics/${topic?.slug as string}#case-${caseItem.id as string}`,
+            href: `/student/topics/${topic?.slug as string}#case-${caseItem.id as string}`,
             topic_slug: topic?.slug ?? null,
           })),
         mnemonics: (mnemonicsResult.data ?? [])
@@ -259,7 +259,7 @@ export function createSupabaseStudentRepository(
               buildSnippetText(mnemonic.title as string, mnemonic.content_md as string | null | undefined),
               trimmedQuery
             ),
-            href: `/topics/${topic?.slug as string}#mnemonic-${mnemonic.id as string}`,
+            href: `/student/topics/${topic?.slug as string}#mnemonic-${mnemonic.id as string}`,
             topic_slug: topic?.slug ?? null,
           })),
       });
