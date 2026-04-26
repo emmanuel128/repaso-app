@@ -31,7 +31,7 @@ export function getDefaultAuthenticatedRoute(access: CurrentAccess): string | nu
   }
 
   if (canEnterStudentArea(access)) {
-    return "/student/dashboard";
+    return "/student";
   }
 
   return null;
