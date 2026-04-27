@@ -2,7 +2,6 @@ export { getStudentAttemptReview } from "./attempts";
 export { getStudentDashboardSnapshot } from "./dashboard";
 export {
   getStudentPracticeContent,
-  startStudentPracticeSession,
   submitStudentPracticeAttempt,
   updateStudentQuestionFlag,
 } from "./practice";

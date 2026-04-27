@@ -3,6 +3,7 @@
 import type { Student as DomainStudent } from "@repaso/domain";
 
 export interface PracticeDraft {
+  practiceSessionId: string;
   topicId: string;
   topicSlug: string;
   topicName: string;

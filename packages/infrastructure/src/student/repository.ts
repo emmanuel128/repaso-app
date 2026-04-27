@@ -265,11 +265,11 @@ export function createSupabaseStudentRepository(
       });
     },
 
-    async fetchPracticeQuestions(
+    async startPracticeSession(
       topicId: string,
       limit = 10
-    ): Promise<DomainStudent.PracticeQuestion[]> {
-      const { data, error } = await client.rpc("get_topic_practice_questions", {
+    ): Promise<DomainStudent.PracticeSessionContent> {
+      const { data, error } = await client.rpc("start_student_practice_session", {
         p_topic_id: topicId,
         p_limit: limit,
       });
@@ -278,10 +278,24 @@ export function createSupabaseStudentRepository(
         throw error;
       }
 
-      return ((data ?? []) as DomainStudent.PracticeQuestion[]).map((question) => ({
+      const row = ((data ?? [])[0] ?? null) as {
+        practice_session_id?: string | null;
+        questions?: DomainStudent.PracticeQuestion[] | null;
+      } | null;
+
+      if (!row?.practice_session_id) {
+        throw new Error("Practice session did not return a result.");
+      }
+
+      const questions = Array.isArray(row.questions) ? row.questions : [];
+
+      return {
+        practiceSessionId: row.practice_session_id,
+        questions: questions.map((question) => ({
         ...question,
         options: [...question.options].sort((a, b) => a.order_index - b.order_index),
-      }));
+        })),
+      };
     },
 
     async fetchQuestionFlags(questionIds: string[]): Promise<string[]> {
@@ -332,25 +346,6 @@ export function createSupabaseStudentRepository(
       if (error) {
         throw error;
       }
-    },
-
-    async createPracticeSession(input): Promise<DomainStudent.PracticeSession> {
-      const { data, error } = await client
-        .from("practice_sessions")
-        .insert({
-          tenant_id: input.tenantId,
-          user_id: input.userId,
-          topic_id: input.topicId,
-          config: input.config ?? {},
-        })
-        .select("*")
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data as DomainStudent.PracticeSession;
     },
 
     async submitPracticeAttempt(input): Promise<DomainStudent.PracticeSubmissionSummary> {

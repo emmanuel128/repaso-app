@@ -12,14 +12,15 @@ export async function getStudentPracticeContent(
     throw new Error("No encontramos el tema solicitado.");
   }
 
-  const questions = await repository.fetchPracticeQuestions(detail.topic.id, questionLimit);
+  const practiceSession = await repository.startPracticeSession(detail.topic.id, questionLimit);
   const flaggedQuestionIds = await repository.fetchQuestionFlags(
-    questions.map((question) => question.question_id)
+    practiceSession.questions.map((question) => question.question_id)
   );
 
   return {
     detail,
-    questions,
+    practiceSessionId: practiceSession.practiceSessionId,
+    questions: practiceSession.questions,
     flaggedQuestionIds,
   };
 }
@@ -34,18 +35,6 @@ export async function updateStudentQuestionFlag(
   }
 ): Promise<void> {
   return repository.setQuestionFlag(input);
-}
-
-export async function startStudentPracticeSession(
-  repository: StudentRepository,
-  input: {
-    tenantId: string;
-    userId: string;
-    topicId: string;
-    config?: Record<string, unknown>;
-  }
-) {
-  return repository.createPracticeSession(input);
 }
 
 export async function submitStudentPracticeAttempt(

@@ -17,7 +17,6 @@ export default function PracticeSummaryPage() {
   const access = Access.useCurrentAccess();
   const accessLoading = access.loading;
   const user = access.user;
-  const membership = access.membership;
   const allowed = access.isStudent && access.hasActiveMembership;
   const accessError = allowed
     ? null
@@ -39,7 +38,7 @@ export default function PracticeSummaryPage() {
       return;
     }
 
-    if (!draft) {
+    if (!draft?.practiceSessionId) {
       router.replace(`/student/topics/${slug}/practice`);
     }
   }, [accessLoading, allowed, draft, router, slug, user]);
@@ -53,7 +52,7 @@ export default function PracticeSummaryPage() {
   const flaggedQuestionIds = useMemo(() => new Set(draft?.flaggedQuestionIds ?? []), [draft]);
 
   async function handleSubmit() {
-    if (!draft || !membership || !user) {
+    if (!draft || !user) {
       return;
     }
 
@@ -72,15 +71,9 @@ export default function PracticeSummaryPage() {
       }));
 
       const result = await submitPracticeAttempt({
-        tenantId: membership.tenant_id,
-        userId: user.id,
         topicId: draft.topicId,
+        practiceSessionId: draft.practiceSessionId,
         answers: payload,
-        config: {
-          question_count: draft.questions.length,
-          source: "student_mvp",
-          summary_reviewed: true,
-        },
       });
 
       clearPracticeDraft(user.id, draft.topicSlug);
@@ -104,7 +97,7 @@ export default function PracticeSummaryPage() {
     );
   }
 
-  if (!slug || accessLoading || !draft) {
+  if (!slug || accessLoading || !draft?.practiceSessionId) {
     return <PageLoader label="Preparando resumen..." />;
   }
 

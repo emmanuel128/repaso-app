@@ -17,21 +17,12 @@ export function usePracticeMutations() {
       await ApplicationStudent.updateStudentQuestionFlag(repository, input);
     },
     async submitPracticeAttempt(input: {
-      tenantId: string;
-      userId: string;
       topicId: string;
+      practiceSessionId: string;
       answers: DomainStudent.SelectedAnswer[];
-      config?: Record<string, unknown>;
     }): Promise<DomainStudent.PracticeSubmissionSummary> {
-      const session = await ApplicationStudent.startStudentPracticeSession(repository, {
-        tenantId: input.tenantId,
-        userId: input.userId,
-        topicId: input.topicId,
-        config: input.config,
-      });
-
       return ApplicationStudent.submitStudentPracticeAttempt(repository, {
-        practiceSessionId: session.id,
+        practiceSessionId: input.practiceSessionId,
         topicId: input.topicId,
         answers: input.answers,
       });

@@ -20,6 +20,7 @@ export type {
   PracticeQuestion,
   PracticeQuestionOption,
   PracticeSession,
+  PracticeSessionContent,
   PracticeSubmissionSummary,
   SelectedAnswer,
   StudentPracticeContent,

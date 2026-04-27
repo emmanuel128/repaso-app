@@ -46,6 +46,11 @@ export interface PracticeSubmissionSummary {
   question_count: number;
 }
 
+export interface PracticeSessionContent {
+  practiceSessionId: string;
+  questions: PracticeQuestion[];
+}
+
 export interface AttemptReviewOption extends PracticeQuestionOption {
   is_correct: boolean;
 }
@@ -62,6 +67,7 @@ export interface AttemptReviewQuestion {
 
 export interface StudentPracticeContent {
   detail: import("./content").TopicDetail;
+  practiceSessionId: string;
   questions: PracticeQuestion[];
   flaggedQuestionIds: string[];
 }

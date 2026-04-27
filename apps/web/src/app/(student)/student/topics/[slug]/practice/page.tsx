@@ -51,11 +51,12 @@ export default function PracticePage() {
   }, [content, questions, slug, user]);
 
   useEffect(() => {
-    if (!detail || !user || !slug || questions.length === 0) {
+    if (!content || !detail || !user || !slug || questions.length === 0) {
       return;
     }
 
     savePracticeDraft(user.id, slug, {
+      practiceSessionId: content.practiceSessionId,
       topicId: detail.topic.id,
       topicSlug: detail.topic.slug,
       topicName: detail.topic.name,
@@ -64,7 +65,7 @@ export default function PracticePage() {
       flaggedQuestionIds,
       updatedAt: new Date().toISOString(),
     });
-  }, [answers, detail, flaggedQuestionIds, questions, slug, user]);
+  }, [answers, content, detail, flaggedQuestionIds, questions, slug, user]);
 
   const answeredCount = useMemo(
     () => Object.values(answers).filter(Boolean).length,
