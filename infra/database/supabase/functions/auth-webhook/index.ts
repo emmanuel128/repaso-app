@@ -58,7 +58,8 @@ async function handler(req: Request): Promise<Response> {
   const eventType = payload?.type ?? payload?.event;
   const record = payload?.record;
 
-  console.debug("payload received", payload);
+  // console.debug("payload received", payload);
+  console.debug("payload received", { eventType: eventType, userId: record?.id });
   if (!record?.id) {
     console.warn("auth-webhook: missing record.id");
     return new Response(JSON.stringify({ ok: true, skip: true }), {
